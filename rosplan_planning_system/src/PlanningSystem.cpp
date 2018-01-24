@@ -473,11 +473,13 @@ namespace KCL_rosplan {
 		nh.getParam("/rosplan_planning_system/parser", parser_selection);
 		
 		// Gets overwritten by commandline.
+        bool command_generate_problem = true;
 		for (unsigned int i = 0; i < argc; ++i)
 		{
 			if (string(argv[i]) == "parser=ff") parser_selection = "ff";
 			if (string(argv[i]) == "parser=popf") parser_selection = "popf";
 			if (string(argv[i]) == "parser=popf3") parser_selection = "popf3";
+			if (string(argv[i]) == "no-gen") command_generate_problem = false;
 		}
 		
 		ROS_INFO("KCL: (PS) Started planner with the parser: %s. Possible options: popf, popf3, ff.", parser_selection.c_str());
@@ -506,7 +508,9 @@ namespace KCL_rosplan {
 		// start a problem generation service
 		bool genProb = true;
 		nh.getParam("/rosplan_planning_system/generate_default_problem", genProb);
+        if (!command_generate_problem) genProb = false;
 		planningSystem.generate_problem = genProb;
+
 
 		if(genProb) {
 			ROS_INFO("KCL: (PS) Using the standard PDDL problem generator.");

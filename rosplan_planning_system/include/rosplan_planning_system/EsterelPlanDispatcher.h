@@ -26,6 +26,7 @@ namespace KCL_rosplan
 
 		/* mapping PDDL conditions and esterel inputs */
 		ros::ServiceClient query_knowledge_client;
+        ros::ServiceClient get_attribute_client_;
 
 		/* plan description from parser */
 		std::vector<StrlNode*> * plan_nodes;

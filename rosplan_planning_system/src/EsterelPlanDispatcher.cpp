@@ -18,6 +18,7 @@ namespace KCL_rosplan {
 
 		current_action = 0;
 
+        get_attribute_client_ = nh.serviceClient<rosplan_knowledge_msgs::GetAttributeService>("/kcl_rosplan/get_current_knowledge");
 		query_knowledge_client = nh.serviceClient<rosplan_knowledge_msgs::KnowledgeQueryService>("/kcl_rosplan/query_knowledge_base");
 		plan_graph_publisher = nh.advertise<std_msgs::String>("/kcl_rosplan/plan_graph", 1000, true);
 	}
@@ -238,7 +239,7 @@ namespace KCL_rosplan {
 					// query KMS for condition edges
 					bool activate = true;
 					if(action_edge_count==0 || activate_action) {
-						std::cout << "==================CHeck external conditions! [" << strl_node->node_id << "] " << strl_node->node_name << std::endl;
+						std::cout << "==================Check external conditions! [" << strl_node->node_id << "] " << strl_node->node_name << std::endl;
 						for (std::vector<StrlEdge*>::const_iterator ci = strl_node->input.begin(); ci != strl_node->input.end(); ++ci) {
 							StrlEdge* edge = *ci;
 							std::cout << "Check: " << edge->edge_name << std::endl;
@@ -246,7 +247,7 @@ namespace KCL_rosplan {
 								// Check if all external conditions have been satisfied.
 								rosplan_knowledge_msgs::KnowledgeQueryService querySrv;
 								querySrv.request.knowledge = edge->external_conditions;
-								
+
 								for (std::vector<rosplan_knowledge_msgs::KnowledgeItem>::const_iterator ci = edge->external_conditions.begin(); ci != edge->external_conditions.end(); ++ci)
 								{
 									const rosplan_knowledge_msgs::KnowledgeItem& ki = *ci;
@@ -263,10 +264,33 @@ namespace KCL_rosplan {
 									edge_values[edge] = querySrv.response.all_true;
 									if (!querySrv.response.all_true) {
 										activate = false;
-										
-										break;
+                                        std::cout << "Conditions are not true!" << std::endl;
+
+                                        rosplan_knowledge_msgs::GetAttributeService get_attribute;
+                                        for (std::vector<rosplan_knowledge_msgs::KnowledgeItem>::const_iterator ci = edge->external_conditions.begin(); ci != edge->external_conditions.end(); ++ci)
+                                        {
+									        const rosplan_knowledge_msgs::KnowledgeItem& ki = *ci;
+                                            get_attribute.request.predicate_name = ki.attribute_name;
+                                            if (!get_attribute_client_.call(get_attribute)) {
+                                                ROS_ERROR("KCL: (KnowledgeBase) Failed to recieve the attributes of the predicate '%s'", ki.attribute_name.c_str());
+                                                return false;
+                                            }
+                                                        
+                                            for (std::vector<rosplan_knowledge_msgs::KnowledgeItem>::const_iterator ci = get_attribute.response.attributes.begin(); ci != get_attribute.response.attributes.end(); ++ci)
+                                            {
+                                                const rosplan_knowledge_msgs::KnowledgeItem& ki = *ci;
+                                                std::cout << "(" << ki.attribute_name;
+                                                for (std::vector<diagnostic_msgs::KeyValue>::const_iterator ci2 = ki.values.begin(); ci2 != ki.values.end(); ++ci2)
+                                                {
+                                                    const diagnostic_msgs::KeyValue& kv = *ci2;
+                                                    std::cout << " " << kv.key << "=" << kv.value;
+                                                }
+                                                std::cout << ")" << std::endl;
+                                            }
+                                        }
+                                        break;
 									} else {
-										
+                                        std::cout << "Conditions are true!" << std::endl;
 									}
 								} else {
 									ROS_ERROR("KCL: (EsterelPlanDispatcher) Query to KMS failed; no condition edges are true.");
@@ -370,15 +394,22 @@ namespace KCL_rosplan {
 		// more specific feedback
 		actionFeedback(msg);
 
-		// action completed (successfuly)
-		if(!action_completed[normalised_action_id] && 0 == msg->status.compare("action achieved"))
-			action_completed[normalised_action_id] = true;
+        if (!action_completed[normalised_action_id])
+        {
+            if(msg->status == "action failed") {
+                replan_requested = true;
+            }
 
-		// action completed (failed)
-		if(!action_completed[normalised_action_id] && 0 == msg->status.compare("action failed")) {
-			replan_requested = true;
-			action_completed[normalised_action_id] = true;
-		}
+            if (msg->status == "action aborted") {
+                plan_cancelled = true;
+            }
+
+            if (msg->status == "action failed" ||
+                msg->status == "action achieved" ||
+                msg->status == "action aborted") {
+		        action_completed[normalised_action_id] = true;
+            }
+        }
 	}
 
 	/*---------------------------*/

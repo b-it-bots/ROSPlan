@@ -13,18 +13,28 @@ namespace KCL_rosplan {
 		if(a.knowledge_type == rosplan_knowledge_msgs::KnowledgeItem::INSTANCE) {
 			
 			// check instance knowledge
-			if(0!=a.instance_type.compare(b.instance_type)) return false;
-			if(a.instance_name!="" && 0!=a.instance_name.compare(b.instance_name)) return false;
+			if(a.instance_type != b.instance_type) return false;
+			if(a.instance_name != b.instance_name) return false;
 
 		} else {
 
 			// check fact or function
-			if(a.attribute_name!="" && 0!=a.attribute_name.compare(b.attribute_name)) return false;
+			if(a.attribute_name != b.attribute_name) return false;
 			if(a.is_negative != b.is_negative) return false;
 			if(a.values.size() != b.values.size()) return false;
-			for(size_t i=0;i<a.values.size();i++) {
-				if(""!=a.values[i].value && a.values[i].value != b.values[i].value)
-					return false;
+			for(size_t i = 0; i < a.values.size(); ++i) {
+                const std::string& key = a.values[i].key;
+                bool found_key = false;
+                for(size_t j = 0; j < a.values.size(); ++j) {
+                    const std::string& other_key = b.values[j].key;
+                    if (key == other_key) {
+                        if (a.values[i].value != b.values[j].value) return false;
+                        found_key = true;
+                        break;
+                    }
+                }
+
+                if (!found_key) return false;
 			}
 		}
 

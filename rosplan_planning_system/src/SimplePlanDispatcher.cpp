@@ -217,15 +217,18 @@ namespace KCL_rosplan {
 		// more specific feedback
 		actionFeedback(msg);
 
-		// action completed (successfuly)
-		if(!action_completed[msg->action_id] && 0 == msg->status.compare("action achieved"))
-			action_completed[msg->action_id] = true;
+        if (!action_completed[msg->action_id])
+        {
+            if(msg->status == "action failed") {
+                replan_requested = true;
+            }
 
-		// action completed (failed)
-		if(!action_completed[msg->action_id] && 0 == msg->status.compare("action failed")) {
-			replan_requested = true;
-			action_completed[msg->action_id] = true;
-		}
+            if (msg->status == "action failed" ||
+                msg->status == "action achieved" ||
+                msg->status == "action aborted") {
+		        action_completed[msg->action_id] = true;
+            }
+        }
 	}
 
 	/*---------------------------*/

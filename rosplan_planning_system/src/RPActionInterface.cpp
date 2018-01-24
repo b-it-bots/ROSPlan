@@ -228,7 +228,7 @@ namespace KCL_rosplan {
 		} else {
 
 			// publish feedback (failed)
-			fb.status = "action failed";
+			fb.status = "action aborted";
 			action_feedback_pub.publish(fb);
 		}
 	}

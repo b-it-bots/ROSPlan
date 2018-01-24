@@ -46,7 +46,7 @@ namespace KCL_rosplan {
 		std::map<std::string, std::vector<std::vector<std::string> > >::iterator oit;
 		oit = environment.domain_operator_precondition_map.find(normalised_action_name);
 		if(oit==environment.domain_operator_precondition_map.end()) {
-			std::cerr << "action precondition map entry not found:" << node.dispatch_msg.name << std::endl;
+//			std::cerr << "action precondition map entry not found:" << node.dispatch_msg.name << std::endl;
 			for (std::map<std::string, std::vector<std::vector<std::string> > >::const_iterator ci = environment.domain_operator_precondition_map.begin(); ci != environment.domain_operator_precondition_map.end(); ++ci)
 			{
 				std::cerr << (*ci).first;
@@ -66,7 +66,7 @@ namespace KCL_rosplan {
 			return;
 		}
 		
-		std::cout << "[CFFPlanParser::preparePDDLConditions] Process the conditions." << std::endl;
+//		std::cout << "[CFFPlanParser::preparePDDLConditions] Process the conditions." << std::endl;
 		
 		std::vector<rosplan_knowledge_msgs::KnowledgeItem> processed_preconditions;
 
@@ -104,7 +104,7 @@ namespace KCL_rosplan {
 				diagnostic_msgs::KeyValue param;
 				param.key = *pit;
 				
-				std::cout << "[CFFPlanParser::preparePDDLConditions] Process the predicate: ." << *pit << std::endl;
+//				std::cout << "[CFFPlanParser::preparePDDLConditions] Process the predicate: ." << *pit << std::endl;
 
 				// find label as it is in domain operator
 				std::string conditionKey = (*cit)[index];
@@ -160,7 +160,7 @@ namespace KCL_rosplan {
 			node.input.push_back(edge);
 			plan_edges.push_back(edge);
 
-			std::cout << "Added plan edge: " << *edge << std::endl;
+//			std::cout << "Added plan edge: " << *edge << std::endl;
 		}
 	}
 
@@ -170,7 +170,7 @@ namespace KCL_rosplan {
 	
 	void CFFPlanParser::createNodeAndEdge(const std::string& action_name, int action_number, int node_id, PlanningEnvironment &environment, StrlNode& node, StrlEdge& edge)
 	{
-		std::cout << "createNodeAndEdge. Action: " << action_name << "[" << action_number << "] Node ID: " << node_id << std::endl;
+//		std::cout << "createNodeAndEdge. Action: " << action_name << "[" << action_number << "] Node ID: " << node_id << std::endl;
 		node.node_name = action_name;
 		node.node_id = node_id;
 		node.dispatched = false;
@@ -185,7 +185,7 @@ namespace KCL_rosplan {
 		edge.active = false;
 		plan_edges.push_back(&edge);
 		
-		std::cout << "[createNodeAndEdge] " << ss.str() << std::endl;
+//		std::cout << "[createNodeAndEdge] " << ss.str() << std::endl;
 		
 		// prepare message
 		node.output.push_back(&edge);
@@ -196,7 +196,7 @@ namespace KCL_rosplan {
 		
 		std::string operator_name = action_name.substr(0, action_name.find(" "));
 		
-		std::cout << "[createNodeAndEdge] Operator name=" << operator_name << std::endl;
+//		std::cout << "[createNodeAndEdge] Operator name=" << operator_name << std::endl;
 		
 		// check for parameters
 		int curr = operator_name.length();
@@ -208,7 +208,7 @@ namespace KCL_rosplan {
 			node.dispatch_msg.name = operator_name;
 			int parameter_index = 0;
 			
-			std::cout << "We have parameters. " << curr << "-" << next << ". Max: " << action_name.length() << std::endl;
+//			std::cout << "We have parameters. " << curr << "-" << next << ". Max: " << action_name.length() << std::endl;
 			
 			// parameters
 			std::vector<std::string> params;
@@ -218,7 +218,7 @@ namespace KCL_rosplan {
 				if(next == std::string::npos)
 					next = action_name.length();
 				
-				std::cout << "Param [" << parameter_index << "] " << curr << "-" << next << ". Max: " << action_name.length() << std::endl;
+//				std::cout << "Param [" << parameter_index << "] " << curr << "-" << next << ". Max: " << action_name.length() << std::endl;
 				
 				diagnostic_msgs::KeyValue pair;
 				pair.key = environment.domain_operators[operator_name][parameter_index];
@@ -226,13 +226,13 @@ namespace KCL_rosplan {
 				node.dispatch_msg.parameters.push_back(pair);
 				++parameter_index;
 				
-				std::cout << pair.key << " -> " << pair.value << std::endl;
+//				std::cout << pair.key << " -> " << pair.value << std::endl;
 			}
 		}
 		
-		std::cout << "Prepare PDDL conditions." << std::endl;
+//		std::cout << "Prepare PDDL conditions." << std::endl;
 		preparePDDLConditions(node, environment);
-		std::cout << "Finished preparing PDDL conditions." << std::endl;
+//		std::cout << "Finished preparing PDDL conditions." << std::endl;
 		plan_nodes.push_back(&node);
 		jump_map.insert(std::pair<int, StrlNode*>(action_number,&node));
 	}
@@ -279,10 +279,10 @@ namespace KCL_rosplan {
 			std::getline(infile, line);
 			toLowerCase(line);
 			
-			std::cout << "Process: " << line << std::endl;
+//			std::cout << "Process: " << line << std::endl;
 			
 			if (line.compare("ff: found legal plan as follows") == 0) {
-				std::cout << "Plan was found!" << std::endl;
+//				std::cout << "Plan was found!" << std::endl;
 				planFound = true;
 			} else if (!planFound) {
 				//consume useless lines
@@ -296,17 +296,17 @@ namespace KCL_rosplan {
 					std::getline(infile, line);
 					toLowerCase(line);
 					
-					std::cout << "Process (parsing): " << line << std::endl;
+//					std::cout << "Process (parsing): " << line << std::endl;
 					
 					if(line.substr(0,10).compare("time spent")==0)
 					{
-						std::cout << "time spent, break parsing..." << std::endl;
+//						std::cout << "time spent, break parsing..." << std::endl;
 						break;
 					}
 
 					if (line.length()<10)
 					{
-						std::cout << ", break parsing..." << std::endl;
+//						std::cout << ", break parsing..." << std::endl;
 						break;
 					}
 
@@ -317,7 +317,7 @@ namespace KCL_rosplan {
 					// action number
 					//int action_number = atoi(line.substr(5).c_str());
 					int action_number = atoi(line.substr(0, curr).c_str());
-					std::cout << "Process (parsing): Found action number: " << action_number << std::endl;
+//					std::cout << "Process (parsing): Found action number: " << action_number << std::endl;
 
 					// deal with branches
 					if("ramificate" == name) {
@@ -508,7 +508,7 @@ namespace KCL_rosplan {
 							int index = 1;
 							for(std::vector<std::string>::const_iterator ci = predicates.begin(); ci != predicates.end(); ++ci)
 							{
-								std::cout << "Process the parameter: [" << index << "] " << *ci << "=" << tokens[index] << std::endl;
+//								std::cout << "Process the parameter: [" << index << "] " << *ci << "=" << tokens[index] << std::endl;
 								// set parameter label to predicate label
 								diagnostic_msgs::KeyValue param;
 								param.key = *ci;
@@ -564,69 +564,69 @@ namespace KCL_rosplan {
 		std::string strl_file;
 		ros::NodeHandle nh("~");
 		nh.param("/rosplan/strl_file_path", strl_file, std::string("common/plan.strl"));
-		std::cout << "[ CFFPlanParser::produceEsterel] Write to: " << strl_file << std::endl;
+//		std::cout << "[ CFFPlanParser::produceEsterel] Write to: " << strl_file << std::endl;
 		std::ofstream dest;
 		dest.open(strl_file.c_str());
 
 		// main module
 		dest << "module plan:" << std::endl;
-		std::cout << "module plan:" << std::endl;
+//		std::cout << "module plan:" << std::endl;
 
 		// inputs
 		dest << "input SOURCE";
-		std::cout << "input SOURCE";
+//		std::cout << "input SOURCE";
 		std::vector<StrlNode*>::iterator nit = plan_nodes.begin();
 		for(; nit!=plan_nodes.end(); nit++) {
 			dest << ", a" << (*nit)->node_id << "_complete";
-			std::cout << ", a" << (*nit)->node_id << "_complete";
+//			std::cout << ", a" << (*nit)->node_id << "_complete";
 		}
 		dest << std::endl;
-		std::cout << std::endl;
+//		std::cout << std::endl;
 
 		// outputs
 		dest << "output SINK";		
-		std::cout << "output SINK";		
+//		std::cout << "output SINK";		
 		for(nit = plan_nodes.begin(); nit!=plan_nodes.end(); nit++) {
 			dest << ", a" << (*nit)->node_id << "_dispatch";
-			std::cout << ", a" << (*nit)->node_id << "_dispatch";
+//			std::cout << ", a" << (*nit)->node_id << "_dispatch";
 		}
 		dest << std::endl;
-		std::cout << std::endl;
+//		std::cout << std::endl;
 
 		// internal signals
 		std::vector<StrlEdge*>::iterator eit = plan_edges.begin();
 		if(eit!=plan_edges.end()) {
 			dest << "signal " << (*eit)->edge_name;
-			std::cout << "signal " << (*eit)->edge_name;
+//			std::cout << "signal " << (*eit)->edge_name;
 			for(; eit!=plan_edges.end(); eit++) {
 				dest << ", " << (*eit)->edge_name;
-				std::cout << ", " << (*eit)->edge_name;
+//				std::cout << ", " << (*eit)->edge_name;
 			}
 			dest << " in" << std::endl;
-			std::cout << " in" << std::endl;
+//			std::cout << " in" << std::endl;
 		}
 
 		// run everything
 		nit = plan_nodes.begin();
 		if(nit!=plan_nodes.end()) {
 			dest << "run action" << (*nit)->node_id << std::endl;
-			std::cout << "run action" << (*nit)->node_id << std::endl;
+//			std::cout << "run action" << (*nit)->node_id << std::endl;
 			for(; nit!=plan_nodes.end(); nit++) {
 				dest << " || action" << (*nit)->node_id << std::endl;
-				std::cout << " || action" << (*nit)->node_id << std::endl;
+//				std::cout << " || action" << (*nit)->node_id << std::endl;
 			}
 			dest << "end" << std::endl;
-			std::cout << "end" << std::endl;
+//			std::cout << "end" << std::endl;
 		}
 		dest << "end module" << std::endl << std::endl;
-		std::cout << "end module" << std::endl << std::endl;
+//		std::cout << "end module" << std::endl << std::endl;
 
 		// action modules
 		nit = plan_nodes.begin();
 		for(; nit!=plan_nodes.end(); nit++) {
 
 			dest << "module action" << (*nit)->node_id << ":" << std::endl;
-			std::cout << "module action" << (*nit)->node_id << ":" << std::endl;
+//			std::cout << "module action" << (*nit)->node_id << ":" << std::endl;
 
 			if((*nit)->input.size() > 0) {
 				dest << "input ";
@@ -634,10 +634,10 @@ namespace KCL_rosplan {
 				for(int j=0;j<(*nit)->input.size();j++) {
 					if(j>0) dest << ", ";
 					dest << (*nit)->input[j]->edge_name;
-					std::cout << (*nit)->input[j]->edge_name;
+//					std::cout << (*nit)->input[j]->edge_name;
 				}
 				dest << ";" << std::endl;
-				std::cout << ";" << std::endl;
+//				std::cout << ";" << std::endl;
 			}
 
 			if((*nit)->output.size() > 0) {
@@ -646,43 +646,43 @@ namespace KCL_rosplan {
 				for(int j=0;j<(*nit)->output.size();j++) {
 					if(j>0) {
 						dest << ", ";
-						std::cout << ", ";
+//						std::cout << ", ";
 					}
 					dest << (*nit)->output[j]->edge_name;
-					std::cout << (*nit)->output[j]->edge_name;
+//					std::cout << (*nit)->output[j]->edge_name;
 				}
 				dest << ";" << std::endl;
-				std::cout << ";" << std::endl;
+//				std::cout << ";" << std::endl;
 			}
 
 			if((*nit)->input.size() > 0) {
 				dest << "  await ";
-				std::cout << "  await ";
+//				std::cout << "  await ";
 				for(int j=0;j<(*nit)->input.size();j++) {
 					if(j>0) {
 						dest << " or ";
-						std::cout << " or ";
+//						std::cout << " or ";
 					}
 					dest << (*nit)->input[j]->edge_name;
-					std::cout << (*nit)->input[j]->edge_name;
+//					std::cout << (*nit)->input[j]->edge_name;
 				}
 				dest << ";" << std::endl;
-				std::cout << ";" << std::endl;
+//				std::cout << ";" << std::endl;
 			}
 
 			dest << "  emit a" << (*nit)->node_id << "_dispatch;" << std::endl;
-			std::cout << "  emit a" << (*nit)->node_id << "_dispatch;" << std::endl;
+//			std::cout << "  emit a" << (*nit)->node_id << "_dispatch;" << std::endl;
 			dest << "  await a" << (*nit)->node_id << "_complete;" << std::endl;
-			std::cout << "  await a" << (*nit)->node_id << "_complete;" << std::endl;
+//			std::cout << "  await a" << (*nit)->node_id << "_complete;" << std::endl;
 			
 			for(int j=0;j<(*nit)->output.size();j++) {
 				dest << "emit " << (*nit)->output[j]->edge_name;
-				std::cout << "emit " << (*nit)->output[j]->edge_name;
+//				std::cout << "emit " << (*nit)->output[j]->edge_name;
 			}
 			dest << ";" << std::endl;
-			std::cout << ";" << std::endl;
+//			std::cout << ";" << std::endl;
 			dest << "end module" << std::endl << std::endl;
-			std::cout << "end module" << std::endl << std::endl;
+//			std::cout << "end module" << std::endl << std::endl;
 		}
 		dest.close();
 	}
