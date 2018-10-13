@@ -126,6 +126,10 @@ install(DIRECTORY include/rosplan_action_interface
   PATTERN ".svn" EXCLUDE
 )
 
+install(DIRECTORY launch/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
+)
+
 # This should probably go to the package bin directory,
 # but there is no simple way to determine this path from
 # within a launch file similar to "$(find ...)".
@@ -135,4 +139,3 @@ file(GLOB COMMON_BINS common/bin/*)
 install(PROGRAMS ${COMMON_BINS}
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/common/bin
 )
-
