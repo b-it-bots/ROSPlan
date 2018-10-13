@@ -130,6 +130,24 @@ install(DIRECTORY launch/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
 )
 
+install(TARGETS
+    problemInterface
+    popf_planner_interface
+    ff_planner_interface
+    metricff_planner_interface
+    smt_planner_interface
+    fd_planner_interface
+    tfd_planner_interface
+    lpg_planner_interface
+    upm_planner_interface
+    pprp_planner_interface
+    pddl_simple_plan_parser
+    pddl_esterel_plan_parser
+    pddl_simple_plan_dispatcher
+    pddl_esterel_plan_dispatcher
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
 # This should probably go to the package bin directory,
 # but there is no simple way to determine this path from
 # within a launch file similar to "$(find ...)".
