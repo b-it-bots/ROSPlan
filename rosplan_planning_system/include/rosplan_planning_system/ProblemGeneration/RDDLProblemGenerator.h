@@ -8,6 +8,8 @@
 #include "ProblemGenerator.h"
 #include "rosplan_knowledge_msgs/GetDomainOperatorDetailsService.h"
 #include "rosplan_knowledge_msgs/GetDomainOperatorService.h"
+#include "rosplan_knowledge_msgs/GetRDDLParams.h"
+#include "rosplan_knowledge_msgs/ReloadRDDLDomainProblem.h"
 
 namespace KCL_rosplan {
     class RDDLProblemGenerator : public ProblemGenerator {
@@ -28,14 +30,13 @@ namespace KCL_rosplan {
                                        const std::vector<rosplan_knowledge_msgs::KnowledgeItem> &elem);
         void printGenericFluentList(std::ofstream &pFile, const std::set<std::string>& fluentlist);
 
-        int _horizon; // params
-        double _discount; // params
-        int _max_nondef; // params
         std::string _domain_name;
         std::string _non_fluents_name;
         ros::NodeHandle _nh;
+        ros::ServiceClient reload_domain_;
     public:
         RDDLProblemGenerator(const std::string& kb);
+        void generateProblemFile(std::string &problemPath) override;
     };
 }
 

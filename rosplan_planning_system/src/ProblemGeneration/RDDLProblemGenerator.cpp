@@ -5,19 +5,37 @@
 #include "rosplan_planning_system/ProblemGeneration/RDDLProblemGenerator.h"
 
 namespace KCL_rosplan {
-    RDDLProblemGenerator::RDDLProblemGenerator(const std::string& kb) : ProblemGenerator(kb) {
-        _nh.param("horizon", _horizon, 20);
-        _nh.param("discount_factor", _discount, 1.0);
-        _nh.param("max_nondef_actions", _max_nondef, 1);
 
+    RDDLProblemGenerator::RDDLProblemGenerator(const std::string& kb) : ProblemGenerator(kb) {
         // Get domain name
         ros::ServiceClient getNameClient = _nh.serviceClient<rosplan_knowledge_msgs::GetDomainNameService>(domain_name_service);
+        getNameClient.waitForExistence(ros::Duration(15));
         rosplan_knowledge_msgs::GetDomainNameService nameSrv;
         if (!getNameClient.call(nameSrv)) {
-            ROS_ERROR("KCL: (RDDLProblemGenerator) Failed to call service %s", domain_name_service.c_str());
+            ROS_ERROR("KCL: (RDDLProblemGenerator) Failed to call service %s. Is the Knowledge Base running?", domain_name_service.c_str());
+            ros::shutdown();
         }
         _domain_name = nameSrv.response.domain_name;
-        _non_fluents_name = "nf_" + _domain_name + "_inst";
+        _non_fluents_name = "nf_" + _domain_name + "__generate_instance";
+        reload_domain_ = _nh.serviceClient<rosplan_knowledge_msgs::ReloadRDDLDomainProblem>(kb + "/reload_rddl_domain");
+    }
+
+
+    /**
+     * generates a RDDL problem file.
+     * This file is later read by the planner.
+     */
+    void RDDLProblemGenerator::generateProblemFile(std::string &problemPath) {
+        if (knowledge_base.size() == 0) ROS_ERROR("KCL: (%s) Knowledge base is not set!", ros::this_node::getName().c_str());
+        std::ofstream pFile;
+        pFile.open((problemPath).c_str());
+        makeProblem(pFile);
+        pFile.close();
+        rosplan_knowledge_msgs::ReloadRDDLDomainProblem srv;
+        srv.request.problem_path = problemPath;
+        if (not reload_domain_.call(srv) or not srv.response.success) {
+            ROS_ERROR("KCL: (RDDLProblemGenerator) Failed to call service %s.", reload_domain_.getService().c_str());
+        }
     }
 
     void RDDLProblemGenerator::makeProblem(std::ofstream &pFile) {
@@ -61,7 +79,7 @@ namespace KCL_rosplan {
 
 
     void RDDLProblemGenerator::makeInstance(std::ofstream &pFile, const std::set<std::string> &fluents) {
-        pFile << "instance " << _domain_name << "__inst {" << std::endl;
+        pFile << "instance " << _domain_name << "__generated_instance {" << std::endl;
         pFile << "\tdomain = " << _domain_name << ";" << std::endl;
         pFile << "\tnon-fluents = " << _non_fluents_name << ";" << std::endl;
 
@@ -69,9 +87,17 @@ namespace KCL_rosplan {
         pFile << "\tinit-state {" << std::endl;
         printGenericFluentList(pFile, fluents);
         pFile << "\t};" << std::endl;
-        pFile << "\tmax-nondef-actions = " << _max_nondef << ";" << std::endl;
-        pFile << "\thorizon = " << _horizon << ";" << std::endl;
-        pFile << "\tdiscount = " << std::fixed << std::setprecision(2) << _discount << ";" << std::endl;
+
+        std::string srv_name = "/" + knowledge_base + "/state/rddl_parameters";
+        ros::ServiceClient getRDDLParams = _nh.serviceClient<rosplan_knowledge_msgs::GetRDDLParams>(srv_name);
+        rosplan_knowledge_msgs::GetRDDLParams params;
+        if (!getRDDLParams.call(params)) {
+            ROS_ERROR("KCL: (RDDLProblemGenerator) Failed to call service %s", srv_name.c_str());
+        }
+
+        pFile << "\tmax-nondef-actions = " << params.response.max_nondef_actions << ";" << std::endl;
+        pFile << "\thorizon = " << params.response.horizon << ";" << std::endl;
+        pFile << "\tdiscount = " << std::fixed << std::setprecision(2) << params.response.discount_factor << ";" << std::endl;
         pFile << "}" << std::endl;
 
     }
@@ -146,7 +172,20 @@ namespace KCL_rosplan {
                          it != op_srv.response.op.at_end_assign_effects.end(); ++it) {
                         found_fluents.insert(it->LHS.name);
                     }
-
+                    for (size_t i = 0; i < op_srv.response.op.probabilistic_effects.size(); ++i) {
+                        for (auto it = op_srv.response.op.probabilistic_effects[i].add_effects.begin();
+                             it != op_srv.response.op.probabilistic_effects[i].add_effects.end(); ++it) {
+                            found_fluents.insert(it->name);
+                        }
+                        for (auto it = op_srv.response.op.probabilistic_effects[i].del_effects.begin();
+                             it != op_srv.response.op.probabilistic_effects[i].del_effects.end(); ++it) {
+                            found_fluents.insert(it->name);
+                        }
+                        for (auto it = op_srv.response.op.probabilistic_effects[i].assign_effects.begin();
+                             it != op_srv.response.op.probabilistic_effects[i].assign_effects.end(); ++it) {
+                            found_fluents.insert(it->LHS.name);
+                        }
+                    }
                 }
             }
             // Check if the predicate appears in any of the effect lists
@@ -167,7 +206,7 @@ namespace KCL_rosplan {
         rosplan_knowledge_msgs::GetDomainAttributeService domainAttrSrv;
         rosplan_knowledge_msgs::GetDomainAttributeService domainFunSrv;
         if (!getDomainPropsClient.call(domainAttrSrv) or !getDomainFuncsClient.call(domainFunSrv)) {
-            ROS_ERROR("KCL: (rDDLProblemGenerator) Failed to call service %s", domain_predicate_service.c_str());
+            ROS_ERROR("KCL: (RDDLProblemGenerator) Failed to call service %s", domain_predicate_service.c_str());
         } else {
             for (auto it = domainAttrSrv.response.items.begin(); it != domainAttrSrv.response.items.end(); ++it) {
                 pred_funcs.push_back(it->name);

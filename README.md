@@ -1,5 +1,6 @@
 ROSPlan Framework
 =================
+[![Build Status](https://travis-ci.com/KCL-Planning/ROSPlan.svg?branch=master)](https://travis-ci.com/KCL-Planning/ROSPlan)
 
 The main ROSPlan website and documentation is available here:
 http://kcl-planning.github.io/ROSPlan/
@@ -12,11 +13,11 @@ Get the prerequisites:
 
 (for Kinetic)
 ```sh
-sudo apt-get install flex ros-kinetic-move-base-msgs ros-kinetic-mongodb-store ros-kinetic-tf2-bullet freeglut3-dev python-catkin-tools
+sudo apt-get install flex ros-kinetic-move-base-msgs ros-kinetic-mongodb-store ros-kinetic-tf2-bullet freeglut3-dev python-catkin-tools bison libbdd-dev
 ```
 (for Indigo)
 ```sh
-sudo apt-get install flex ros-indigo-mongodb-store ros-indigo-tf2-bullet freeglut3-dev python-catkin-tools
+sudo apt-get install flex ros-indigo-mongodb-store ros-indigo-tf2-bullet freeglut3-dev python-catkin-tools bison libbdd-dev
 ```
 Select a catkin workspace or create a new one:
 ```sh

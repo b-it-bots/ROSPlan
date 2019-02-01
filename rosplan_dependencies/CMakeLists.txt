@@ -1,19 +1,18 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(rosplan_dependencies)
 
-cmake_policy(SET CMP0054 NEW)
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED COMPONENTS rosplan_knowledge_msgs)
 
 # Get the git submodules...
 message(STATUS "[${PROJECT_NAME}] Checking out the submodules...")
-execute_process(COMMAND git -C ${CMAKE_CURRENT_SOURCE_DIR} submodule init OUTPUT_QUIET)
-execute_process(COMMAND git -C ${CMAKE_CURRENT_SOURCE_DIR} submodule update --force OUTPUT_QUIET)
+execute_process(COMMAND git -C ${CMAKE_CURRENT_SOURCE_DIR} submodule init OUTPUT_QUIET ERROR_QUIET WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+execute_process(COMMAND git -C ${CMAKE_CURRENT_SOURCE_DIR} submodule update --force OUTPUT_QUIET ERROR_QUIET WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 ###################################
 ## catkin specific configuration ##
@@ -25,9 +24,9 @@ execute_process(COMMAND git -C ${CMAKE_CURRENT_SOURCE_DIR} submodule update --fo
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-        INCLUDE_DIRS ${catkin_INCLUDE_DIRS} VAL/include rddl_parser
-        LIBRARIES val rddl_parser
-        CATKIN_DEPENDS roscpp
+        INCLUDE_DIRS ${catkin_INCLUDE_DIRS} VAL/include rddl_parser ippc_server/include ippc_server/cpp-base64 ppddl_parser/include ppddl_parser/src
+        LIBRARIES val_kcl rddl_parser ippc_server ppddl_parser
+        CATKIN_DEPENDS roscpp rosplan_knowledge_msgs
         DEPENDS
 )
 
@@ -35,7 +34,7 @@ catkin_package(
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -fomit-frame-pointer -DNDEBUG")
 
-
+########################################################################################################################
 ########################################################################################################################
 ########################################################################################################################
 ## RDDL PARSER
@@ -54,7 +53,7 @@ endif(LBITS EQUAL 64)
 SET (RDDL_CMAKE_CXX_FLAGS "${RDDL_CMAKE_CXX_FLAGS} -g -Wall -W -Wno-sign-compare -Wno-deprecated -ansi -pedantic -Werror -std=c++11")
 
 # Lexer and parser
-find_package(BISON REQUIRED)
+find_package(BISON 3.0.4 REQUIRED)
 find_package(FLEX REQUIRED)
 
 BISON_TARGET(RDDL_PARSER rddl_parser/parser.ypp ${CMAKE_CURRENT_BINARY_DIR}/parser.tab.cc COMPILE_FLAGS -d)
@@ -92,12 +91,13 @@ install(TARGETS rddl_parser
         )
 
 ## Mark cpp header files for installation
-install(DIRECTORY rddl_parser
-        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+install(DIRECTORY rddl_parser/
+        DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
         FILES_MATCHING PATTERN "*.h"
         PATTERN ".svn" EXCLUDE
         )
 
+########################################################################################################################
 ########################################################################################################################
 ########################################################################################################################
 ## VAL
@@ -122,25 +122,26 @@ set(VAL_SOURCES
 
 include_directories("VAL/include")
 
-add_library(val SHARED ${VAL_SOURCES})
-add_dependencies(val ${catkin_EXPORTED_TARGETS})
+add_library(val_kcl SHARED ${VAL_SOURCES})
+add_dependencies(val_kcl ${catkin_EXPORTED_TARGETS})
 
 #############
 ## Install ##
 #############
-install(TARGETS val
+install(TARGETS val_kcl
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
         )
 
 ## Mark cpp header files for installation
-install(DIRECTORY VAL/include
-        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+install(DIRECTORY VAL/include/
+        DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION} # To have the same layout as the include/
         FILES_MATCHING PATTERN "*.h"
         PATTERN ".svn" EXCLUDE
         )
 
+########################################################################################################################
 ########################################################################################################################
 ########################################################################################################################
 ## rddlsim
@@ -162,3 +163,122 @@ endif(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/rddlsim/bin)
 #############
 ## Install ##
 #############
+
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+## PPDDL PARSER
+########################################################################################################################
+message(STATUS "[${PROJECT_NAME}] Preparing PPDDL parser dependency...")
+
+set(PPDDL_DIR ${CMAKE_CURRENT_LIST_DIR}/ppddl_parser/src/PPDDLParser)
+# Lexer and parser
+# Compile FLEX and BISON
+find_package(BISON)
+find_package(FLEX)
+
+
+BISON_TARGET(PPDDL_PARSER ${PPDDL_DIR}/parser.yy ${CMAKE_CURRENT_BINARY_DIR}/ppddl_parser.tab.cc COMPILE_FLAGS -d)
+FLEX_TARGET(PPDDL_SCANNER ${PPDDL_DIR}/tokenizer.ll ${CMAKE_CURRENT_BINARY_DIR}/ppddl_lex.yy.cc)
+ADD_FLEX_BISON_DEPENDENCY(PPDDL_SCANNER PPDDL_PARSER)
+
+# Define variables
+set(FLEX_BISON_OUTPUTS ${BISON_PPDDL_PARSER_OUTPUTS}  ${FLEX_PPDDL_SCANNER_OUTPUTS} CACHE INTERNAL "" FORCE)
+
+set(PPDDL_PARSER_SOURCES
+        ${PPDDL_DIR}/actions.cc
+        ${PPDDL_DIR}/domains.cc
+        ${PPDDL_DIR}/effects.cc
+        ${PPDDL_DIR}/expressions.cc
+        ${PPDDL_DIR}/formulas.cc
+        ${PPDDL_DIR}/functions.cc
+        ${PPDDL_DIR}/predicates.cc
+        ${PPDDL_DIR}/problems.cc
+        ${PPDDL_DIR}/rational.cc
+        ${PPDDL_DIR}/requirements.cc
+        ${PPDDL_DIR}/terms.cc
+        ${PPDDL_DIR}/types.cc)
+
+set(PPDDL_PARSER_HEADERS
+        ${PPDDL_DIR}/actions.h
+        ${PPDDL_DIR}/domains.h
+        ${PPDDL_DIR}/effects.h
+        ${PPDDL_DIR}/expressions.h
+        ${PPDDL_DIR}/formulas.h
+        ${PPDDL_DIR}/functions.h
+        ${PPDDL_DIR}/predicates.h
+        ${PPDDL_DIR}/problems.h
+        ${PPDDL_DIR}/rational.h
+        ${PPDDL_DIR}/refcount.h
+        ${PPDDL_DIR}/requirements.h
+        ${PPDDL_DIR}/terms.h
+        ${PPDDL_DIR}/types.h)
+
+set(PPDDL_PARSER_ALL ${PPDDL_PARSER_SOURCES}
+        ${PPDDL_PARSER_HEADERS}
+        ${FLEX_BISON_OUTPUTS})
+
+include_directories(ppddl_parser/include ppddl_parser/src ${PPDDL_DIR} VAL/include) # We add the src as include because the PPDDLParser headers are there
+
+add_library(ppddl_parser SHARED
+        ppddl_parser/include/PPDDLDeterminizator.h ppddl_parser/src/PPDDLDeterminizator.cpp
+        ppddl_parser/src/PPDDLParserInterface.cpp ppddl_parser/include/PPDDLParserInterface.h
+        ppddl_parser/src/PDDLPrinter.cpp ppddl_parser/include/PDDLPrinter.h
+        ppddl_parser/src/VALConversion.cpp ppddl_parser/include/VALConversion.h
+        ${PPDDL_PARSER_ALL}
+        ppddl_parser/src/Strategies/MLODeterminizator.cpp ppddl_parser/include/Strategies/MLODeterminizator.h
+        ppddl_parser/src/Strategies/AODeterminizator.cpp ppddl_parser/include/Strategies/AODeterminizator.h
+        ppddl_parser/src/Strategies/TLDeterminizator.cpp ppddl_parser/include/Strategies/TLDeterminizator.h
+        ppddl_parser/src/PPDDLDeterminizatorFactory.cpp ppddl_parser/include/PPDDLDeterminizatorFactory.h)
+target_link_libraries(ppddl_parser val_kcl)
+
+#############
+## Install ##
+#############
+
+install(TARGETS ppddl_parser
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+## Mark cpp header files for installation
+install(DIRECTORY ppddl_parser/include/ ppddl_parser/src/
+        DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
+        FILES_MATCHING PATTERN "*.h"
+        PATTERN ".svn" EXCLUDE)
+
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+## ippc_server
+########################################################################################################################
+message(STATUS "[${PROJECT_NAME}] Adding ippc_server dependency...")
+
+###########
+## Build ##
+###########
+
+include_directories(ippc_server/include ippc_server/cpp-base64 ${catkin_INCLUDE_DIRS})
+
+add_library(ippc_server SHARED ippc_server/src/ippc_server.cpp ippc_server/src/strxml.cpp ippc_server/cpp-base64/base64.cpp)
+add_dependencies(ippc_server ${catkin_EXPORTED_TARGETS})
+
+#############
+## Install ##
+#############
+
+install(TARGETS ippc_server
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+        )
+
+## Mark cpp header files for installation
+install(DIRECTORY ippc_server/include/
+        DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
+        FILES_MATCHING PATTERN "*.h"
+        PATTERN ".svn" EXCLUDE)
+
+
+########################################################################################################################
+########################################################################################################################
