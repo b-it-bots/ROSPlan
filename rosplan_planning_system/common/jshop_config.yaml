@@ -1,0 +1,5 @@
+planner_bin_dir: -Djava.class.path=<path-to-planner-dir>/bin
+antlr_jar_path: <path-to-antlr>/antlr.jar
+commons_jar_path: <path-to-commons>/commons-io-2.5.jar
+log4j_api_jar_path: <path-to-log4j-api>/log4j-api-2.11.0.jar
+log4j_core_jar_path: <path-to-log4j-core>/log4j-core-2.11.0.jar

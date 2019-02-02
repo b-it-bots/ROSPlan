@@ -58,7 +58,7 @@ namespace KCL_rosplan {
 					present = (sit!=model_instances[iit->instance_type].end());
 				}
 				break;
-				
+
 			case rosplan_knowledge_msgs::KnowledgeItem::FUNCTION:
 				{
 					// check if function exists and has the correct value
@@ -249,7 +249,7 @@ namespace KCL_rosplan {
 				if(name.compare(msg.instance_name)==0 || msg.instance_name.compare("")==0) {
 					// remove instance from knowledge base
 					ROS_INFO("KCL: (%s) Removing instance (%s, %s)",
-							ros::this_node::getName().c_str(), 
+							ros::this_node::getName().c_str(),
 							msg.instance_type.c_str(),
 							(msg.instance_name.compare("")==0) ? "ALL" : msg.instance_name.c_str());
 					iit = model_instances[msg.instance_type].erase(iit);
@@ -342,7 +342,7 @@ namespace KCL_rosplan {
 	 * add an instance, fact, or function to the knowledge base
 	 */
 	void KnowledgeBase::addKnowledge(rosplan_knowledge_msgs::KnowledgeItem &msg) {
-		
+
 		switch(msg.knowledge_type) {
 
 		case rosplan_knowledge_msgs::KnowledgeItem::INSTANCE:
@@ -434,7 +434,7 @@ namespace KCL_rosplan {
 				return;
 			}
 		}
-		
+
 		// add goal
 		ROS_INFO("KCL: (%s) Adding mission goal (%s%s)", ros::this_node::getName().c_str(), msg.attribute_name.c_str(), param_str.c_str());
 		model_goals.push_back(msg);
@@ -453,7 +453,7 @@ namespace KCL_rosplan {
 	/*----------------*/
 
 	bool KnowledgeBase::getInstances(rosplan_knowledge_msgs::GetInstanceService::Request  &req, rosplan_knowledge_msgs::GetInstanceService::Response &res) {
-	
+
 		// fetch the instances of the correct type
 		if(""==req.type_name) {
 			std::map<std::string,std::vector<std::string> >::iterator iit;
@@ -589,6 +589,10 @@ int main(int argc, char **argv) {
 	    kb_type = KCL_rosplan::KnowledgeBaseFactory::PDDL;
         ROS_INFO("KCL: (%s) Starting a PDDL Knowledge Base", ros::this_node::getName().c_str());
     }
+	else if (extension == ".shop") {
+	    kb_type = KCL_rosplan::KnowledgeBaseFactory::SHOP;
+        ROS_INFO("KCL: (%s) Starting a SHOP Knowledge Base", ros::this_node::getName().c_str());
+    }
     else if (extension == ".ppddl") {
         kb_type = KCL_rosplan::KnowledgeBaseFactory::PPDDL;
         VAL1_2::parse_category::recoverWriteController(); // This avoids a segfault on finish when PDDL kb is not used
@@ -623,4 +627,3 @@ int main(int argc, char **argv) {
 
 	return 0;
 }
-

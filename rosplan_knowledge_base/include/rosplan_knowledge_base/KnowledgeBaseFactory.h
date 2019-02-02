@@ -17,7 +17,8 @@ namespace KCL_rosplan {
         enum KB {
             PDDL,
             PPDDL,
-            RDDL
+            RDDL,
+            SHOP
         };
 
         static KnowledgeBasePtr createKB(KB kb_type, ros::NodeHandle& n);

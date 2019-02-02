@@ -50,6 +50,7 @@ include_directories(${OPENGL_INCLUDE_DIRS} ${GLUT_INCLUDE_DIRS})
 add_executable(problemInterface src/ProblemGeneration/ProblemInterface.cpp src/ProblemGeneration/PDDLProblemGenerator.cpp
                                                                            src/ProblemGeneration/ProblemGenerator.cpp
                                                                            src/ProblemGeneration/RDDLProblemGenerator.cpp
+                                                                           src/ProblemGeneration/SHOPProblemGenerator.cpp
                                                                            src/ProblemGeneration/ProblemGeneratorFactory.cpp)
 add_executable(popf_planner_interface src/PlannerInterface/POPFPlannerInterface.cpp src/PlannerInterface/PlannerInterface.cpp)
 add_executable(ff_planner_interface src/PlannerInterface/FFPlannerInterface.cpp src/PlannerInterface/PlannerInterface.cpp)
@@ -61,6 +62,7 @@ add_executable(tfd_planner_interface src/PlannerInterface/TFDPlannerInterface.cp
 add_executable(lpg_planner_interface src/PlannerInterface/LPGPlannerInterface.cpp src/PlannerInterface/PlannerInterface.cpp)
 add_executable(upm_planner_interface src/PlannerInterface/UPMPlannerInterface.cpp src/PlannerInterface/PlannerInterface.cpp)
 add_executable(pprp_planner_interface src/PlannerInterface/PPRPPlannerInterface.cpp src/PlannerInterface/PlannerInterface.cpp)
+add_executable(jshop_planner_interface src/PlannerInterface/JSHOPPlannerInterface.cpp src/PlannerInterface/PlannerInterface.cpp)
 add_executable(online_planner_interface src/PlannerInterface/OnlinePlannerInterface.cpp src/PlannerInterface/PlannerInterface.cpp)
 add_executable(pddl_simple_plan_parser src/PlanParsing/PDDLSimplePlanParser.cpp src/PlanParsing/PlanParser.cpp)
 add_executable(pddl_esterel_plan_parser src/PlanParsing/PDDLEsterelPlanParser.cpp src/PlanParsing/PlanParser.cpp)
@@ -81,6 +83,7 @@ add_dependencies(tfd_planner_interface ${catkin_EXPORTED_TARGETS})
 add_dependencies(lpg_planner_interface ${catkin_EXPORTED_TARGETS})
 add_dependencies(upm_planner_interface ${catkin_EXPORTED_TARGETS})
 add_dependencies(pprp_planner_interface ${catkin_EXPORTED_TARGETS})
+add_dependencies(jshop_planner_interface ${catkin_EXPORTED_TARGETS})
 add_dependencies(online_planner_interface ${catkin_EXPORTED_TARGETS})
 add_dependencies(pddl_simple_plan_parser ${catkin_EXPORTED_TARGETS})
 add_dependencies(pddl_esterel_plan_parser ${catkin_EXPORTED_TARGETS})
@@ -101,6 +104,7 @@ target_link_libraries(tfd_planner_interface ${catkin_LIBRARIES})
 target_link_libraries(lpg_planner_interface ${catkin_LIBRARIES})
 target_link_libraries(upm_planner_interface ${catkin_LIBRARIES})
 target_link_libraries(pprp_planner_interface ${catkin_LIBRARIES})
+target_link_libraries(jshop_planner_interface ${catkin_LIBRARIES})
 target_link_libraries(online_planner_interface ${catkin_LIBRARIES})
 target_link_libraries(pddl_simple_plan_parser ${catkin_LIBRARIES})
 target_link_libraries(pddl_esterel_plan_parser ${catkin_LIBRARIES})
@@ -151,6 +155,7 @@ install(TARGETS
     lpg_planner_interface
     upm_planner_interface
     pprp_planner_interface
+    jshop_planner_interface
     pddl_simple_plan_parser
     pddl_esterel_plan_parser
     pddl_simple_plan_dispatcher
