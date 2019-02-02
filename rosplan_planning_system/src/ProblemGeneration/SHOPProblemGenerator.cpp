@@ -1,5 +1,7 @@
 #include "rosplan_planning_system/ProblemGeneration/SHOPProblemGenerator.h"
 
+#include "rosplan_planning_system/ProblemGeneration/SHOPProblemGenerator.h"
+
 namespace KCL_rosplan {
 
 
@@ -22,38 +24,7 @@ namespace KCL_rosplan {
 		if (!getNameClient.call(nameSrv)) {
 			ROS_ERROR("KCL: (SHOPProblemGenerator) Failed to call service %s", domain_name_service.c_str());
 		}
-
-		pFile << "(define (problem task)" << std::endl;
-		pFile << "(:domain " << nameSrv.response.domain_name << ")" << std::endl;
-
-		/* objects */
-		pFile << "(:objects" << std::endl;
-
-		// get types
-		rosplan_knowledge_msgs::GetDomainTypeService typeSrv;
-		if (!getTypesClient.call(typeSrv)) {
-			ROS_ERROR("KCL: (SHOPProblemGenerator) Failed to call service %s", domain_type_service.c_str());
-		}
-
-		// get instances of each type
-		for(size_t t=0; t<typeSrv.response.types.size(); t++) {
-
-			rosplan_knowledge_msgs::GetInstanceService instanceSrv;
-			instanceSrv.request.type_name = typeSrv.response.types[t];
-
-			if (!getInstancesClient.call(instanceSrv)) {
-				ROS_ERROR("KCL: (SHOPProblemGenerator) Failed to call service %s: %s", state_instance_service.c_str(), instanceSrv.request.type_name.c_str());
-			} else {
-				if(instanceSrv.response.instances.size() == 0) continue;
-				pFile << "    ";
-				for(size_t i=0;i<instanceSrv.response.instances.size();i++) {
-					pFile << instanceSrv.response.instances[i] << " ";
-				}
-				pFile << "- " << typeSrv.response.types[t] << std::endl;
-			}
-		}
-
-		pFile << ")" << std::endl;
+		pFile << "(defproblem problem " << nameSrv.response.domain_name << "("<< std::endl;
 	}
 
 	/*---------------*/
@@ -71,15 +42,13 @@ namespace KCL_rosplan {
 
 		// note the time now for TILs
 		ros::Time time = ros::Time::now() + ros::Duration(1);
-
-		pFile << "(:init" << std::endl;
-
 		// get propositions
 		rosplan_knowledge_msgs::GetDomainAttributeService domainAttrSrv;
 		if (!getDomainPropsClient.call(domainAttrSrv)) {
 			ROS_ERROR("KCL: (SHOPProblemGenerator) Failed to call service %s", domain_predicate_service.c_str());
 		} else {
 
+			pFile << ";--- INITIAL STATE ---"<< std::endl;
 			std::vector<rosplan_knowledge_msgs::DomainFormula>::iterator ait = domainAttrSrv.response.items.begin();
 			for(; ait != domainAttrSrv.response.items.end(); ait++) {
 
@@ -141,51 +110,6 @@ namespace KCL_rosplan {
 				pFile << std::endl;
 			}
 		}
-
-		// get functions
-		if (!getDomainFuncsClient.call(domainAttrSrv)) {
-			ROS_ERROR("KCL: (SHOPProblemGenerator) Failed to call service %s", domain_function_service.c_str());
-		} else {
-
-			std::vector<rosplan_knowledge_msgs::DomainFormula>::iterator ait = domainAttrSrv.response.items.begin();
-			for(; ait != domainAttrSrv.response.items.end(); ait++) {
-
-				rosplan_knowledge_msgs::GetAttributeService attrSrv;
-				attrSrv.request.predicate_name = ait->name;
-				if (!getFuncsClient.call(attrSrv)) {
-					ROS_ERROR("KCL: (SHOPProblemGenerator) Failed to call service %s: %s", state_function_service.c_str(), attrSrv.request.predicate_name.c_str());
-				} else {
-
-					for(size_t i=0;i<attrSrv.response.attributes.size();i++) {
-
-						rosplan_knowledge_msgs::KnowledgeItem attr = attrSrv.response.attributes[i];
-
-						pFile << "    (";
-
-						if(time < attr.initial_time) {
-							pFile << "at " << (attr.initial_time - time).toSec() << " (";
-						}
-
-						pFile << "= (";
-
-						pFile << attr.attribute_name;
-						for(size_t j=0; j<attr.values.size(); j++) {
-							pFile << " " << attr.values[j].value;
-						}
-
-						pFile << ") " << attr.function_value << ")";
-
-						if(time < attr.initial_time) {
-							pFile << ")";
-						}
-
-						pFile << std::endl;
-					}
-				}
-				pFile << std::endl;
-			}
-		}
-
 		pFile << ")" << std::endl;
 	}
 
@@ -197,8 +121,8 @@ namespace KCL_rosplan {
 
 		ros::NodeHandle nh;
 		ros::ServiceClient getCurrentGoalsClient = nh.serviceClient<rosplan_knowledge_msgs::GetAttributeService>(state_goal_service);
-
-		pFile << "(:goal (and" << std::endl;
+		pFile << ";--- TASKS ---"<< std::endl;
+		pFile << "(" << std::endl;
 
 		// get current goals
 		rosplan_knowledge_msgs::GetAttributeService currentGoalSrv;
@@ -245,7 +169,7 @@ namespace KCL_rosplan {
 				}
 			}
 		}
-		pFile << "))" << std::endl;
+		pFile << ")" << std::endl;
 	}
 
 
