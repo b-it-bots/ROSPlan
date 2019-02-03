@@ -1,0 +1,218 @@
+(defdomain
+	storing-groceries(
+; ---------------------- Operators ----------------------
+(   :operator (!move_base ?robot ?from ?to)
+	    ;; Precondition
+			((waypoint ?to))
+		;; Delete
+			((robot_at ?robot ?from))
+		;; Add
+			((robot_at ?robot ?to))
+	);move_base
+
+	(:operator (!open_door ?robot ?door ?waypoint)
+		;; Precondition
+			((robot_at ?robot ?waypoint)
+			 (door ?door)
+			 (door_status ?door closed))
+		;; Delete
+			((door_status ?door closed))
+		;; Add
+			((door_status ?door open))
+	);openDoor
+
+	(:operator (!!perceived_waypoint ?plane ?waypoint)
+    	;; Precondition
+    		((waypoint ?waypoint)
+    		 (not (perceive ?plane ?waypoint)))
+    	;; Delete
+    		()
+    	;; Add
+    		((explored ?waypoint))
+    );perceive_plane
+
+	(:operator (!perceive_plane ?robot ?plane ?waypoint)
+		;; Precondition
+			((robot_at ?robot ?waypoint)
+			 (belongs_to ?plane ?waypoint)
+			 (perceive ?plane ?waypoint))
+		;; Delete
+			 ((perceive ?plane ?waypoint))
+		;; Add
+			((perceived ?plane ?waypoint))
+	);perceive_plane
+
+	(:operator (!pick ?robot ?object ?plane ?waypoint)
+		;; Precondition
+			((robot_at ?robot ?waypoint)
+			 (plane ?plane)
+			 (perceived ?plane ?waypoint)
+			 (belongs_to ?plane ?waypoint)
+			 (on_plane ?object ?plane)
+			 (store_object ?object)
+			 (emptyGripper ?robot))
+		;; Delete
+			((on_plane ?object ?plane)
+			 (store_object ?object)
+			 (emptyGripper ?robot))
+		;; Add
+			((holding ?robot ?object))
+	);pick_object
+
+	(:operator (!place ?robot ?object ?plane ?waypoint)
+		;; Precondition
+			((perceived ?plane ?waypoint)
+			 (belongs_to ?plane ?waypoint)
+			 (holding ?robot ?object))
+		;; Delete
+			((holding ?robot ?object))
+		;; Add
+			((emptyGripper ?robot)
+			 (on_plane ?object ?plane))
+	);place_object
+; ----------------------- Methods -----------------------
+	(:method (storeGroceries ?robot ?from_waypoint ?to_waypoint)
+  		BRANCH-EVERYTHING-STORED
+  		    ;; Precondition
+    			((not (store_object ?object)))
+  			;; Task List
+    			()
+    	BRANCH-FOR-BOTH-WAYPOINTS-EXPLORED
+			;; Precondition
+    			((explored ?from_waypoint)
+    			 (explored ?to_waypoint))
+  			;; Task List
+    			((pick_and_place ?robot ?from_waypoint ?to_waypoint)
+    			 (storeGroceries ?robot ?from_waypoint ?to_waypoint))
+    	BRANCH-FOR-CUPBOARD-EXPLORED
+			;; Precondition
+    			((robot_at ?robot ?current_possition)
+    			 (explored ?to_waypoint))
+  			;; Task List
+    			((check_waypoint ?robot ?current_possition ?from_waypoint)
+    			 (exploreTable ?robot ?from_waypoint)
+    			 (pick_and_place ?robot ?from_waypoint ?to_waypoint)
+    			 (storeGroceries ?robot ?from_waypoint ?to_waypoint))
+    	BRANCH-FOR-TABLE-EXPLORED
+			;; Precondition
+    			((explored ?from_waypoint)
+    			 (robot_at ?robot ?current_possition))
+  			;; Task List
+    			((check_waypoint ?robot ?current_possition ?to_waypoint)
+    			 (exploreCupboard ?robot ?to_waypoint)
+    			 (pick_and_place ?robot ?from_waypoint ?to_waypoint)
+    			 (storeGroceries ?robot ?from_waypoint ?to_waypoint))
+    	BRANCH-FOR-BOTH-WAYPOINTS-UNEXPLORED
+			;; Precondition
+    			((robot_at ?robot ?current_possition))
+  			;; Task List
+    			((check_waypoint ?robot ?current_possition ?to_waypoint)
+    			 (exploreCupboard ?robot ?to_waypoint)
+    			 (check_waypoint ?robot ?to_waypoint ?from_waypoint)
+    			 (exploreTable ?robot ?from_waypoint)
+    			 (pick_and_place ?robot ?from_waypoint ?to_waypoint)
+    			 (storeGroceries ?robot ?from_waypoint ?to_waypoint))
+	 	);storeGroceries
+
+	(:method (check_waypoint ?robot ?from_waypoint ?to_waypoint)
+    	BRANCH-FOR-AT-WAYPOINT
+			;; Precondition
+    			((waypoint ?to_waypoint)
+    			 (robot_at ?robot ?to_waypoint))
+  			;; Task List
+    			()
+    	BRANCH-NOT-AT-WAYPOINT
+  			;; Precondition
+    			((not (robot_at ?robot ?to_waypoint)))
+  			;; Task List
+    			((!move_base ?robot ?from_waypoint ?to_waypoint))
+	);check_waypoint
+
+	(:method (exploreCupboard ?robot ?cupboard)
+	    BRANCH-UNEXPLORED-SHELVES-STILL-EXISTS-DOOR-CLOSED
+            ;; Precondition
+        		((door ?cupboarddoor)
+        		(door_status ?cupboarddoor closed)
+        		(robot_at ?robot ?cupboard))
+        	;; Task List
+        		((!open_door ?robot ?cupboarddoor ?cupboard)
+        		 (exploreCupboard ?robot ?cupboard))
+        BRANCH-UNEXPLORED-SHELVES-STILL-EXISTS-AT-CUPBOARD
+          	;; Precondition
+            	((robot_at ?robot ?cupboard)
+            	 (door_status ?cupboarddoor open)
+            	 (perceive ?plane ?cupboard)
+            	 (belongs_to ?plane ?cupboard))
+          	;; Task List
+            	((!perceive_plane ?robot ?plane ?cupboard)
+            	 (exploreCupboard ?robot ?cupboard))
+		BRANCH-ALL-SHELVES-PERCEIVED
+            ;; Precondition -
+                ((belongs_to ?plane ?cupboard)
+                (not (perceive ?plane ?cupboard))
+                 (not (explored ?cupboard)))
+            ;; Task List
+                ((!!perceived_waypoint ?plane ?cupboard)
+                 (exploreCupboard ?robot ?cupboard))
+        BRANCH-ALL-SHELVES-EXPLORED
+            ;; Precondition
+                ((explored ?cupboard))
+             ;; Task List
+                 ()
+	);exploreCupboard
+
+	(:method (exploreTable ?robot ?table)
+		BRANCH-AT-TABLE-PERCEIVE-PLANE
+  			;; Precondition
+  				((robot_at ?robot ?table)
+    			(belongs_to ?plane ?table)
+    			(perceive ?plane ?table))
+  			;; Task List
+    			((!perceive_plane ?robot ?plane ?table)
+    			 (exploreTable ?robot ?table))
+    	BRANCH-PLANE-PERCEIVED
+             ;; Precondition -
+                ((belongs_to ?plane ?table)
+                (not (perceive ?plane ?table))
+                (not (explored ?table)))
+             ;; Task List
+                ((!!perceived_waypoint ?plane ?table)
+                 (exploreTable ?robot ?table))
+        BRANCH-TABLE-EXPLORED
+             ;; Precondition -
+                ((explored ?table))
+             ;; Task List
+                 ()
+    );exploreTable
+
+	(:method (pick_and_place ?robot ?from_waypoint ?to_waypoint)
+		BRANCH-EVERYTHING-STORED
+  			;; Precondition
+    		    ((not (store_object ?object)))
+  			;; Task List
+    			()
+    	BRANCH-NOT-AT-TABLE
+    		;; Precondition
+    			((not (robot_at ?robot ?from_waypoint))
+    			 (on_plane ?object ?from_plane)
+    			 (store_object ?object)
+           		(emptyGripper ?robot))
+  			;; Task List
+    			((check_waypoint ?robot ?to_waypoint ?from_waypoint)
+    			 (!pick ?robot ?object ?from_plane ?from_waypoint  )
+    		 	 (check_waypoint ?robot ?from_waypoint ?to_waypoint)
+    			 (!place ?robot ?object ?to_plane ?to_waypoint))
+		BRANCH-ALREADY-AT-TABLE
+  			;; Precondition
+    			((robot_at ?robot ?from_waypoint)
+    			 (on_plane ?object ?from_plane)
+    			 (store_object ?object)
+    			 (emptyGripper ?robot))
+  			;; Task List
+    			((!pick ?robot ?object ?from_plane ?from_waypoint  )
+                 (check_waypoint ?robot ?from_waypoint ?to_waypoint)
+                 (!place ?robot ?object ?to_plane ?to_waypoint))
+    );pick_and_place
+
+    );groceries
+);defdomain
