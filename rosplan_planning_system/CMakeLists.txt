@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
+set(CMAKE_CXX_STANDARD 11)
 project(rosplan_planning_system)
 
 ## Find catkin macros and libraries
