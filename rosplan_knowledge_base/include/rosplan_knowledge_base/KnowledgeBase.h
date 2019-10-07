@@ -74,6 +74,9 @@ namespace KCL_rosplan {
         void removeMissionGoal(rosplan_knowledge_msgs::KnowledgeItem &msg);
 		void removeMissionMetric(rosplan_knowledge_msgs::KnowledgeItem &msg);
 
+		/* PDDL model (persistent state) */
+		std::map<std::string, std::vector<std::string> > domain_constants;
+
 		/* PDDL model (current state) */
 		std::map<std::string, std::vector<std::string> > model_constants;
 		std::map<std::string, std::vector<std::string> > model_instances;
@@ -92,6 +95,8 @@ namespace KCL_rosplan {
 		std::map<std::string, bool> sensed_predicates;
 
         ros::NodeHandle _nh;
+
+        double _kb_rate;
     public:
 
 		KnowledgeBase(ros::NodeHandle& n);
@@ -104,6 +109,7 @@ namespace KCL_rosplan {
 
         /* add the initial state to the knowledge base */
         virtual void addInitialState() =0;
+    	virtual void addConstants() =0;
 
 		/* service methods for querying the model */
 		bool queryKnowledge(rosplan_knowledge_msgs::KnowledgeQueryService::Request  &req, rosplan_knowledge_msgs::KnowledgeQueryService::Response &res);
