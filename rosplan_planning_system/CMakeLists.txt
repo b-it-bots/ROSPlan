@@ -62,6 +62,7 @@ add_executable(upm_planner_interface src/PlannerInterface/UPMPlannerInterface.cp
 add_executable(pprp_planner_interface src/PlannerInterface/PPRPPlannerInterface.cpp src/PlannerInterface/PlannerInterface.cpp)
 add_executable(online_planner_interface src/PlannerInterface/OnlinePlannerInterface.cpp src/PlannerInterface/PlannerInterface.cpp)
 add_executable(pddl_simple_plan_parser src/PlanParsing/PDDLSimplePlanParser.cpp src/PlanParsing/PlanParser.cpp)
+add_executable(pddl_lama_plan_parser src/PlanParsing/PDDLLAMAPlanParser.cpp src/PlanParsing/PlanParser.cpp)
 add_executable(pddl_esterel_plan_parser src/PlanParsing/PDDLEsterelPlanParser.cpp src/PlanParsing/PlanParser.cpp)
 add_executable(pddl_simple_plan_dispatcher src/PlanDispatch/SimplePlanDispatcher.cpp src/PlanDispatch/PlanDispatcher.cpp)
 add_executable(pddl_esterel_plan_dispatcher src/PlanDispatch/EsterelPlanDispatcher.cpp src/PlanDispatch/PlanDispatcher.cpp)
@@ -83,6 +84,7 @@ add_dependencies(upm_planner_interface ${catkin_EXPORTED_TARGETS})
 add_dependencies(pprp_planner_interface ${catkin_EXPORTED_TARGETS})
 add_dependencies(online_planner_interface ${catkin_EXPORTED_TARGETS})
 add_dependencies(pddl_simple_plan_parser ${catkin_EXPORTED_TARGETS})
+add_dependencies(pddl_lama_plan_parser ${catkin_EXPORTED_TARGETS})
 add_dependencies(pddl_esterel_plan_parser ${catkin_EXPORTED_TARGETS})
 add_dependencies(pddl_simple_plan_dispatcher ${catkin_EXPORTED_TARGETS})
 add_dependencies(pddl_esterel_plan_dispatcher ${catkin_EXPORTED_TARGETS})
@@ -104,6 +106,7 @@ target_link_libraries(upm_planner_interface ${catkin_LIBRARIES})
 target_link_libraries(pprp_planner_interface ${catkin_LIBRARIES})
 target_link_libraries(online_planner_interface ${catkin_LIBRARIES})
 target_link_libraries(pddl_simple_plan_parser ${catkin_LIBRARIES})
+target_link_libraries(pddl_lama_plan_parser ${catkin_LIBRARIES})
 target_link_libraries(pddl_esterel_plan_parser ${catkin_LIBRARIES})
 target_link_libraries(pddl_simple_plan_dispatcher ${catkin_LIBRARIES})
 target_link_libraries(pddl_esterel_plan_dispatcher ${catkin_LIBRARIES})
@@ -152,6 +155,7 @@ install(TARGETS
     upm_planner_interface
     pprp_planner_interface
     pddl_simple_plan_parser
+    pddl_lama_plan_parser
     pddl_esterel_plan_parser
     pddl_simple_plan_dispatcher
     pddl_esterel_plan_dispatcher
