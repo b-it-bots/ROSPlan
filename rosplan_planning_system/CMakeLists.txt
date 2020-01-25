@@ -50,6 +50,7 @@ add_executable(problemInterface src/ProblemGeneration/ProblemInterface.cpp src/P
                                                                            src/ProblemGeneration/RDDLProblemGenerator.cpp
                                                                            src/ProblemGeneration/ProblemGeneratorFactory.cpp)
 add_executable(popf_planner_interface src/PlannerInterface/POPFPlannerInterface.cpp src/PlannerInterface/PlannerInterface.cpp)
+add_executable(lama_planner_interface src/PlannerInterface/LAMAPlannerInterface.cpp src/PlannerInterface/PlannerInterface.cpp)
 add_executable(ff_planner_interface src/PlannerInterface/FFPlannerInterface.cpp src/PlannerInterface/PlannerInterface.cpp)
 add_executable(rddlsim_planner_interface src/PlannerInterface/RDDLSIMPlannerInterface.cpp src/PlannerInterface/PlannerInterface.cpp)
 add_executable(metricff_planner_interface src/PlannerInterface/FFPlannerInterface.cpp src/PlannerInterface/PlannerInterface.cpp)
@@ -61,6 +62,7 @@ add_executable(upm_planner_interface src/PlannerInterface/UPMPlannerInterface.cp
 add_executable(pprp_planner_interface src/PlannerInterface/PPRPPlannerInterface.cpp src/PlannerInterface/PlannerInterface.cpp)
 add_executable(online_planner_interface src/PlannerInterface/OnlinePlannerInterface.cpp src/PlannerInterface/PlannerInterface.cpp)
 add_executable(pddl_simple_plan_parser src/PlanParsing/PDDLSimplePlanParser.cpp src/PlanParsing/PlanParser.cpp)
+add_executable(pddl_lama_plan_parser src/PlanParsing/PDDLLAMAPlanParser.cpp src/PlanParsing/PlanParser.cpp)
 add_executable(pddl_esterel_plan_parser src/PlanParsing/PDDLEsterelPlanParser.cpp src/PlanParsing/PlanParser.cpp)
 add_executable(pddl_simple_plan_dispatcher src/PlanDispatch/SimplePlanDispatcher.cpp src/PlanDispatch/PlanDispatcher.cpp)
 add_executable(pddl_esterel_plan_dispatcher src/PlanDispatch/EsterelPlanDispatcher.cpp src/PlanDispatch/PlanDispatcher.cpp)
@@ -70,6 +72,7 @@ add_executable(simulatedAction src/ActionInterface/RPSimulatedActionInterface.cp
 ## Add dependencies
 add_dependencies(problemInterface ${catkin_EXPORTED_TARGETS})
 add_dependencies(popf_planner_interface ${catkin_EXPORTED_TARGETS})
+add_dependencies(lama_planner_interface ${catkin_EXPORTED_TARGETS})
 add_dependencies(ff_planner_interface ${catkin_EXPORTED_TARGETS})
 add_dependencies(rddlsim_planner_interface ${catkin_EXPORTED_TARGETS})
 add_dependencies(metricff_planner_interface ${catkin_EXPORTED_TARGETS})
@@ -81,6 +84,7 @@ add_dependencies(upm_planner_interface ${catkin_EXPORTED_TARGETS})
 add_dependencies(pprp_planner_interface ${catkin_EXPORTED_TARGETS})
 add_dependencies(online_planner_interface ${catkin_EXPORTED_TARGETS})
 add_dependencies(pddl_simple_plan_parser ${catkin_EXPORTED_TARGETS})
+add_dependencies(pddl_lama_plan_parser ${catkin_EXPORTED_TARGETS})
 add_dependencies(pddl_esterel_plan_parser ${catkin_EXPORTED_TARGETS})
 add_dependencies(pddl_simple_plan_dispatcher ${catkin_EXPORTED_TARGETS})
 add_dependencies(pddl_esterel_plan_dispatcher ${catkin_EXPORTED_TARGETS})
@@ -90,6 +94,7 @@ add_dependencies(simulatedAction ${catkin_EXPORTED_TARGETS})
 ## Specify libraries against which to link a library or executable target
 target_link_libraries(problemInterface ${catkin_LIBRARIES})
 target_link_libraries(popf_planner_interface ${catkin_LIBRARIES})
+target_link_libraries(lama_planner_interface ${catkin_LIBRARIES})
 target_link_libraries(ff_planner_interface ${catkin_LIBRARIES})
 target_link_libraries(rddlsim_planner_interface ${catkin_LIBRARIES})
 target_link_libraries(metricff_planner_interface ${catkin_LIBRARIES})
@@ -101,6 +106,7 @@ target_link_libraries(upm_planner_interface ${catkin_LIBRARIES})
 target_link_libraries(pprp_planner_interface ${catkin_LIBRARIES})
 target_link_libraries(online_planner_interface ${catkin_LIBRARIES})
 target_link_libraries(pddl_simple_plan_parser ${catkin_LIBRARIES})
+target_link_libraries(pddl_lama_plan_parser ${catkin_LIBRARIES})
 target_link_libraries(pddl_esterel_plan_parser ${catkin_LIBRARIES})
 target_link_libraries(pddl_simple_plan_dispatcher ${catkin_LIBRARIES})
 target_link_libraries(pddl_esterel_plan_dispatcher ${catkin_LIBRARIES})
@@ -139,6 +145,7 @@ install(DIRECTORY launch/
 install(TARGETS
     problemInterface
     popf_planner_interface
+    lama_planner_interface
     ff_planner_interface
     metricff_planner_interface
     smt_planner_interface
@@ -148,6 +155,7 @@ install(TARGETS
     upm_planner_interface
     pprp_planner_interface
     pddl_simple_plan_parser
+    pddl_lama_plan_parser
     pddl_esterel_plan_parser
     pddl_simple_plan_dispatcher
     pddl_esterel_plan_dispatcher
