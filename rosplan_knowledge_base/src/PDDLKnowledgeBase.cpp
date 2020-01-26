@@ -24,13 +24,20 @@ namespace KCL_rosplan {
         {
             for (VAL1_2::pddl_type_list::const_iterator ci = types->begin(); ci != types->end(); ci++) {
                 const VAL1_2::pddl_type* type = *ci;
+
+                // we skip types used for defining domain constants;
+                // this is to prevent writing the domain constants
+                // to the problem file as well, which some planners
+                // complain about due to redefinition of constants
+                if (domain_constants.count(type->getName())) continue;
+
                 res.types.push_back(type->getName());
                 if(type->type) res.super_types.push_back(type->type->getName());
                 else res.super_types.push_back("");
             }
         }
         return true;
-    }        
+    }
 
     /* get domain predicates */
     bool PDDLKnowledgeBase::getPredicates(rosplan_knowledge_msgs::GetDomainAttributeService::Request  &req, rosplan_knowledge_msgs::GetDomainAttributeService::Response &res) {
@@ -88,7 +95,7 @@ namespace KCL_rosplan {
     bool PDDLKnowledgeBase::getOperators(rosplan_knowledge_msgs::GetDomainOperatorService::Request  &req, rosplan_knowledge_msgs::GetDomainOperatorService::Response &res) {
 
         VAL1_2::operator_list* operators = domain_parser.domain->ops;
-        for (VAL1_2::operator_list::const_iterator ci = operators->begin(); ci != operators->end(); ci++) {            
+        for (VAL1_2::operator_list::const_iterator ci = operators->begin(); ci != operators->end(); ci++) {
             const VAL1_2::operator_* op = *ci;
 
             // name
@@ -113,7 +120,7 @@ namespace KCL_rosplan {
     bool PDDLKnowledgeBase::getOperatorDetails(rosplan_knowledge_msgs::GetDomainOperatorDetailsService::Request  &req, rosplan_knowledge_msgs::GetDomainOperatorDetailsService::Response &res) {
         VALVisitorOperator op_visitor;
         VAL1_2::operator_list* operators = domain_parser.domain->ops;
-        for (VAL1_2::operator_list::const_iterator ci = operators->begin(); ci != operators->end(); ci++) {            
+        for (VAL1_2::operator_list::const_iterator ci = operators->begin(); ci != operators->end(); ci++) {
             if((*ci)->name->symbol::getName() == req.name) {
                 op_visitor.visit_operator_(*ci);
                 res.op = op_visitor.msg;
@@ -127,7 +134,7 @@ namespace KCL_rosplan {
     bool PDDLKnowledgeBase::getPredicateDetails(rosplan_knowledge_msgs::GetDomainPredicateDetailsService::Request  &req, rosplan_knowledge_msgs::GetDomainPredicateDetailsService::Response &res) {
         VALVisitorPredicate pred_visitor;
         VAL1_2::pred_decl_list* predicates = domain_parser.domain->predicates;
-        for (VAL1_2::pred_decl_list::const_iterator ci = predicates->begin(); ci != predicates->end(); ci++) {            
+        for (VAL1_2::pred_decl_list::const_iterator ci = predicates->begin(); ci != predicates->end(); ci++) {
             if((*ci)->getPred()->symbol::getName() == req.name) {
                 pred_visitor.visit_pred_decl(*ci);
                 res.predicate = pred_visitor.msg;
