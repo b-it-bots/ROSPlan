@@ -1,0 +1,3 @@
+# Get all tasks. The results are passed as an array of KnowledgeItems
+---
+rosplan_knowledge_msgs/KnowledgeItem[] attributes

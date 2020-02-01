@@ -28,6 +28,7 @@ add_message_files(
 add_service_files(
   FILES
   GetAttributeService.srv
+  GetTaskService.srv
   GetInstanceService.srv
   GetMetricService.srv
   KnowledgeUpdateService.srv
