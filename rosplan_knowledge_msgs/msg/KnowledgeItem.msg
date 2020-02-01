@@ -5,6 +5,7 @@ uint8 FACT = 1
 uint8 FUNCTION = 2
 uint8 EXPRESSION = 3
 uint8 INEQUALITY = 4
+uint8 TASK= 4
 
 uint8 knowledge_type
 
