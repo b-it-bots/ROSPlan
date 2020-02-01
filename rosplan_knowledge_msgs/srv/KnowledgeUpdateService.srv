@@ -7,6 +7,8 @@ uint8 REMOVE_KNOWLEDGE = 2
 uint8 REMOVE_GOAL = 3
 uint8 ADD_METRIC = 4
 uint8 REMOVE_METRIC = 5
+uint8 ADD_TASK = 6
+uint8 REMOVE_TASK = 7
 
 uint8 update_type
 rosplan_knowledge_msgs/KnowledgeItem knowledge
