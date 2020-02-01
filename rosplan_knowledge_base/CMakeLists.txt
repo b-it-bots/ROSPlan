@@ -62,6 +62,7 @@ set(KNOWLEDGE_SOURCES
     src/PDDLDomainParser.cpp
     src/PDDLProblemParser.cpp
     src/PDDLKnowledgeBase.cpp
+    src/HDDLKnowledgeBase.cpp
     src/RDDLTaskParser.cpp
     src/RDDLKnowledgeBase.cpp
     src/RDDLExprUtils.cpp
@@ -70,6 +71,7 @@ set(KNOWLEDGE_SOURCES
     src/VALVisitorPredicate.cpp
     src/VALVisitorProblem.cpp
     src/PPDDLKnowledgeBase.cpp
+    src/HDDLKnowledgeBase.cpp
     src/PPDDLParser.cpp
     src/PPDDLUtils.cpp
 )

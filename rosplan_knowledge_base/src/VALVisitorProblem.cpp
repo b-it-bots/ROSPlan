@@ -42,6 +42,11 @@ namespace KCL_rosplan {
 		return goals;
 	}
 
+    std::vector<rosplan_knowledge_msgs::KnowledgeItem> VALVisitorProblem::returnTasks() {
+		problem->the_task->visit(this);
+		return tasks;
+	}
+
 	rosplan_knowledge_msgs::KnowledgeItem VALVisitorProblem::returnMetric() {
 		problem->metric->visit(this);
 		return metric;
@@ -251,7 +256,7 @@ namespace KCL_rosplan {
         item.is_negative = problem_cond_neg;
 
         rosplan_knowledge_msgs::DomainInequality ineq;
-        
+
         switch( c->getOp() )
         {
             case VAL1_2::E_GREATER: ineq.comparison_type = rosplan_knowledge_msgs::DomainInequality::GREATER; break;
@@ -275,7 +280,7 @@ namespace KCL_rosplan {
     }
 
 	void VALVisitorProblem::visit_timed_goal(VAL1_2::timed_goal *c){
-		ROS_WARN("KCL: (%s) Timed goal not a part of PDDL problem parsing.", ros::this_node::getName().c_str());	
+		ROS_WARN("KCL: (%s) Timed goal not a part of PDDL problem parsing.", ros::this_node::getName().c_str());
 	}
 
 	/*---------*/

@@ -22,6 +22,7 @@
 #include "rosplan_knowledge_msgs/DomainFormula.h"
 
 #include "rosplan_knowledge_msgs/GetAttributeService.h"
+#include "rosplan_knowledge_msgs/GetTaskService.h"
 #include "rosplan_knowledge_msgs/GetInstanceService.h"
 #include "rosplan_knowledge_msgs/GetMetricService.h"
 #include "rosplan_knowledge_msgs/KnowledgeItem.h"
@@ -65,6 +66,7 @@ namespace KCL_rosplan {
 		/* adding items to the knowledge base */
 		void addKnowledge(rosplan_knowledge_msgs::KnowledgeItem &msg);
 		void addMissionGoal(rosplan_knowledge_msgs::KnowledgeItem &msg);
+		void addMissionTask(rosplan_knowledge_msgs::KnowledgeItem &msg);
 		void addMissionMetric(rosplan_knowledge_msgs::KnowledgeItem &msg);
 
 		/* removing items from the knowledge base */
@@ -72,6 +74,7 @@ namespace KCL_rosplan {
         virtual void removeFact(const rosplan_knowledge_msgs::KnowledgeItem &msg);
 
         void removeMissionGoal(rosplan_knowledge_msgs::KnowledgeItem &msg);
+        void removeMissionTask(rosplan_knowledge_msgs::KnowledgeItem &msg);
 		void removeMissionMetric(rosplan_knowledge_msgs::KnowledgeItem &msg);
 
 		/* PDDL model (persistent state) */
@@ -83,6 +86,7 @@ namespace KCL_rosplan {
 		std::vector<rosplan_knowledge_msgs::KnowledgeItem> model_facts;
 		std::vector<rosplan_knowledge_msgs::KnowledgeItem> model_functions;
 		std::vector<rosplan_knowledge_msgs::KnowledgeItem> model_goals;
+		std::vector<rosplan_knowledge_msgs::KnowledgeItem> model_tasks;
         rosplan_knowledge_msgs::KnowledgeItem model_metric;
 
 		/* timed initial literals */
@@ -119,6 +123,7 @@ namespace KCL_rosplan {
 		bool getPropositions(rosplan_knowledge_msgs::GetAttributeService::Request  &req, rosplan_knowledge_msgs::GetAttributeService::Response &res);
 		bool getFunctions(rosplan_knowledge_msgs::GetAttributeService::Request  &req, rosplan_knowledge_msgs::GetAttributeService::Response &res);
 		bool getGoals(rosplan_knowledge_msgs::GetAttributeService::Request  &req, rosplan_knowledge_msgs::GetAttributeService::Response &res);
+		bool getTasks(rosplan_knowledge_msgs::GetTaskService::Request  &req, rosplan_knowledge_msgs::GetTaskService::Response &res);
 		bool getMetric(rosplan_knowledge_msgs::GetMetricService::Request  &req, rosplan_knowledge_msgs::GetMetricService::Response &res);
 		bool getTimedKnowledge(rosplan_knowledge_msgs::GetAttributeService::Request  &req, rosplan_knowledge_msgs::GetAttributeService::Response &res);
 
