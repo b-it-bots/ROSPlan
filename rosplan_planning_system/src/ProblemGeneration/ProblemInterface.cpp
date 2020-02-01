@@ -37,6 +37,7 @@ namespace KCL_rosplan {
 		if (not planning_lang.empty()) {
 			if (planning_lang == "pddl" or planning_lang == "ppddl") pg_type = KCL_rosplan::ProblemGeneratorFactory::PDDL;
 			else if (planning_lang == "rddl") pg_type = KCL_rosplan::ProblemGeneratorFactory::RDDL;
+			else if (planning_lang == "hddl") pg_type = KCL_rosplan::ProblemGeneratorFactory::HDDL;
 			else {
 				ROS_WARN("KCL: (%s) Unexpected planning language %s. Please specify the planning language as either \"PDDL\" or \"RDDL\".",
 						  ros::this_node::getName().c_str(), planning_lang.c_str());
@@ -46,6 +47,7 @@ namespace KCL_rosplan {
             std::string extension = (problem_path.size() > 5) ? problem_path.substr(problem_path.find_last_of('.')) : "";
             if (extension == ".pddl" or extension == ".ppddl") pg_type = KCL_rosplan::ProblemGeneratorFactory::PDDL;
             else if (extension == ".rddl") pg_type = KCL_rosplan::ProblemGeneratorFactory::RDDL;
+            else if (extension == ".hddl") pg_type = KCL_rosplan::ProblemGeneratorFactory::HDDL;
             else {
                 ROS_ERROR("KCL: (%s) Unexpected problem file extension %s. Please provide a problem file written in PDDL (.pddl extension) or RDDL (.rddl extension).",
                           ros::this_node::getName().c_str(), extension.c_str());

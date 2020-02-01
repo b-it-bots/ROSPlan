@@ -48,9 +48,11 @@ add_definitions(-Wno-deprecated-declarations)
 add_executable(problemInterface src/ProblemGeneration/ProblemInterface.cpp src/ProblemGeneration/PDDLProblemGenerator.cpp
                                                                            src/ProblemGeneration/ProblemGenerator.cpp
                                                                            src/ProblemGeneration/RDDLProblemGenerator.cpp
+                                                                           src/ProblemGeneration/HDDLProblemGenerator.cpp
                                                                            src/ProblemGeneration/ProblemGeneratorFactory.cpp)
 add_executable(popf_planner_interface src/PlannerInterface/POPFPlannerInterface.cpp src/PlannerInterface/PlannerInterface.cpp)
 add_executable(lama_planner_interface src/PlannerInterface/LAMAPlannerInterface.cpp src/PlannerInterface/PlannerInterface.cpp)
+add_executable(panda_planner_interface src/PlannerInterface/PANDAPlannerInterface.cpp src/PlannerInterface/PlannerInterface.cpp)
 add_executable(ff_planner_interface src/PlannerInterface/FFPlannerInterface.cpp src/PlannerInterface/PlannerInterface.cpp)
 add_executable(rddlsim_planner_interface src/PlannerInterface/RDDLSIMPlannerInterface.cpp src/PlannerInterface/PlannerInterface.cpp)
 add_executable(metricff_planner_interface src/PlannerInterface/FFPlannerInterface.cpp src/PlannerInterface/PlannerInterface.cpp)
@@ -73,6 +75,7 @@ add_executable(simulatedAction src/ActionInterface/RPSimulatedActionInterface.cp
 add_dependencies(problemInterface ${catkin_EXPORTED_TARGETS})
 add_dependencies(popf_planner_interface ${catkin_EXPORTED_TARGETS})
 add_dependencies(lama_planner_interface ${catkin_EXPORTED_TARGETS})
+add_dependencies(panda_planner_interface ${catkin_EXPORTED_TARGETS})
 add_dependencies(ff_planner_interface ${catkin_EXPORTED_TARGETS})
 add_dependencies(rddlsim_planner_interface ${catkin_EXPORTED_TARGETS})
 add_dependencies(metricff_planner_interface ${catkin_EXPORTED_TARGETS})
@@ -95,6 +98,7 @@ add_dependencies(simulatedAction ${catkin_EXPORTED_TARGETS})
 target_link_libraries(problemInterface ${catkin_LIBRARIES})
 target_link_libraries(popf_planner_interface ${catkin_LIBRARIES})
 target_link_libraries(lama_planner_interface ${catkin_LIBRARIES})
+target_link_libraries(panda_planner_interface ${catkin_LIBRARIES})
 target_link_libraries(ff_planner_interface ${catkin_LIBRARIES})
 target_link_libraries(rddlsim_planner_interface ${catkin_LIBRARIES})
 target_link_libraries(metricff_planner_interface ${catkin_LIBRARIES})
@@ -146,6 +150,7 @@ install(TARGETS
     problemInterface
     popf_planner_interface
     lama_planner_interface
+    panda_planner_interface
     ff_planner_interface
     metricff_planner_interface
     smt_planner_interface
