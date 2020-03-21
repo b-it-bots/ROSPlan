@@ -1783,8 +1783,6 @@ YY_RULE_SETUP
 {unsigned int i; 
           yylval.cp = new char[strlen(yytext)+1];
           strcpy(yylval.cp,yytext);
-	  for(i = 0;i<strlen(yylval.cp);i++)
-	      yylval.cp[i] = tolower(yylval.cp[i]);
 	  // If symbol is registered as a function symbol,
 	  // return token FUNCTION_SYMBOL else return NAME
 	  //cout << yytext << " " << line_no << "\n";
