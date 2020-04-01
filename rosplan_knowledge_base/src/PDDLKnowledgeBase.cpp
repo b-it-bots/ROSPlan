@@ -29,7 +29,7 @@ namespace KCL_rosplan {
                 // this is to prevent writing the domain constants
                 // to the problem file as well, which some planners
                 // complain about due to redefinition of constants
-                if (domain_constants.count(type->getName())) continue;
+                if (domain_constants.count(type->getName()) != 0 && domain_constants[type->getName()].size() > 0) continue;
 
                 res.types.push_back(type->getName());
                 if(type->type) res.super_types.push_back(type->type->getName());
