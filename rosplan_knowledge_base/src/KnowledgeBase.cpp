@@ -64,7 +64,7 @@ namespace KCL_rosplan {
                     }
 				}
 				break;
-				
+
 			case rosplan_knowledge_msgs::KnowledgeItem::FUNCTION:
 				{
 					// check if function exists and has the correct value
@@ -160,12 +160,20 @@ namespace KCL_rosplan {
 			addMissionGoal(req.knowledge);
 			break;
 
+        case rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_TASK:
+			addMissionTask(req.knowledge);
+			break;
+
 		case rosplan_knowledge_msgs::KnowledgeUpdateService::Request::REMOVE_KNOWLEDGE:
 			removeKnowledge(req.knowledge);
 			break;
 
 		case rosplan_knowledge_msgs::KnowledgeUpdateService::Request::REMOVE_GOAL:
 			removeMissionGoal(req.knowledge);
+			break;
+
+        case rosplan_knowledge_msgs::KnowledgeUpdateService::Request::REMOVE_TASK:
+			removeMissionTask(req.knowledge);
 			break;
 
 		case rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_METRIC:
@@ -218,6 +226,7 @@ namespace KCL_rosplan {
 		model_facts.clear();
 		model_functions.clear();
 		model_goals.clear();
+		model_tasks.clear();
 		model_metric = empty;
 	}
 
@@ -255,7 +264,7 @@ namespace KCL_rosplan {
 				if(name.compare(msg.instance_name)==0 || msg.instance_name.compare("")==0) {
 					// remove instance from knowledge base
 					ROS_INFO("KCL: (%s) Removing instance (%s, %s)",
-							ros::this_node::getName().c_str(), 
+							ros::this_node::getName().c_str(),
 							msg.instance_type.c_str(),
 							(msg.instance_name.compare("")==0) ? "ALL" : msg.instance_name.c_str());
 					iit = model_instances[msg.instance_type].erase(iit);
@@ -340,6 +349,22 @@ namespace KCL_rosplan {
 		}
 	}
 
+    /**
+	 * remove mission goal
+	 */
+	void KnowledgeBase::removeMissionTask(rosplan_knowledge_msgs::KnowledgeItem &msg) {
+
+		std::vector<rosplan_knowledge_msgs::KnowledgeItem>::iterator git;
+		for(git=model_tasks.begin(); git!=model_tasks.end(); ) {
+			if(KnowledgeComparitor::containsKnowledge(msg, *git)) {
+				ROS_INFO("KCL: (%s) Removing task (%s)", ros::this_node::getName().c_str(), git->attribute_name.c_str());
+				git = model_tasks.erase(git);
+			} else {
+				git++;
+			}
+		}
+	}
+
 	/**
 	 * remove mission metric
 	 */
@@ -357,7 +382,7 @@ namespace KCL_rosplan {
 	 * add an instance, fact, or function to the knowledge base
 	 */
 	void KnowledgeBase::addKnowledge(rosplan_knowledge_msgs::KnowledgeItem &msg) {
-		
+
 		switch(msg.knowledge_type) {
 
 		case rosplan_knowledge_msgs::KnowledgeItem::INSTANCE:
@@ -455,10 +480,35 @@ namespace KCL_rosplan {
 				return;
 			}
 		}
-		
+
 		// add goal
 		ROS_INFO("KCL: (%s) Adding mission goal (%s%s)", ros::this_node::getName().c_str(), msg.attribute_name.c_str(), param_str.c_str());
 		model_goals.push_back(msg);
+	}
+
+    /*
+	 * add mission task to knowledge base
+	 */
+	void KnowledgeBase::addMissionTask(rosplan_knowledge_msgs::KnowledgeItem &msg) {
+
+		// create parameter string for ROS_INFO messages
+		std::string param_str;
+		for (size_t i = 0; i < msg.values.size(); ++i) {
+			param_str += " " + msg.values[i].value;
+		}
+
+		// check to make sure goal is not already added
+		std::vector<rosplan_knowledge_msgs::KnowledgeItem>::iterator pit;
+		for(pit=model_goals.begin(); pit!=model_goals.end(); pit++) {
+			if(KnowledgeComparitor::containsKnowledge(msg, *pit)) {
+				ROS_WARN("KCL: (%s) Goal (%s%s) already posted", ros::this_node::getName().c_str(), msg.attribute_name.c_str(), param_str.c_str());
+				return;
+			}
+		}
+
+		// add goal
+		ROS_INFO("KCL: (%s) Adding mission task (%s%s)", ros::this_node::getName().c_str(), msg.attribute_name.c_str(), param_str.c_str());
+		model_tasks.push_back(msg);
 	}
 
 	/*
@@ -474,7 +524,7 @@ namespace KCL_rosplan {
 	/*----------------*/
 
 	bool KnowledgeBase::getInstances(rosplan_knowledge_msgs::GetInstanceService::Request  &req, rosplan_knowledge_msgs::GetInstanceService::Response &res) {
-	
+
 		// fetch the instances of the correct type
 		if(""==req.type_name) {
 			std::map<std::string,std::vector<std::string> >::iterator iit;
@@ -552,6 +602,12 @@ namespace KCL_rosplan {
 		return true;
 	}
 
+    bool KnowledgeBase::getTasks(rosplan_knowledge_msgs::GetTaskService::Request  &req, rosplan_knowledge_msgs::GetTaskService::Response &res) {
+		for(size_t i=0; i<model_goals.size(); i++)
+			res.attributes.push_back(model_tasks[i]);
+		return true;
+	}
+
 	bool KnowledgeBase::getMetric(rosplan_knowledge_msgs::GetMetricService::Request  &req, rosplan_knowledge_msgs::GetMetricService::Response &res) {
 		res.metric = model_metric;
 		return true;
@@ -591,6 +647,7 @@ namespace KCL_rosplan {
 		stateServer3 = _nh.advertiseService("state/functions",			&KCL_rosplan::KnowledgeBase::getFunctions, this);
 		stateServer4 = _nh.advertiseService("state/timed_knowledge",	&KCL_rosplan::KnowledgeBase::getTimedKnowledge, this);
 		stateServer5 = _nh.advertiseService("state/goals",				&KCL_rosplan::KnowledgeBase::getGoals, this);
+		stateServer5 = _nh.advertiseService("state/tasks",				&KCL_rosplan::KnowledgeBase::getTasks, this);
 		stateServer6 = _nh.advertiseService("state/metric",			    &KCL_rosplan::KnowledgeBase::getMetric, this);
 
 		// set sensed predicates
@@ -625,20 +682,25 @@ int main(int argc, char **argv) {
 	    kb_type = KCL_rosplan::KnowledgeBaseFactory::PDDL;
             ROS_INFO("KCL: (%s) Starting a PDDL Knowledge Base", ros::this_node::getName().c_str());
         }
-        else if (extension == ".ppddl") {
-            kb_type = KCL_rosplan::KnowledgeBaseFactory::PPDDL;
-            VAL1_2::parse_category::recoverWriteController(); // This avoids a segfault on finish when PDDL kb is not used
-            ROS_INFO("KCL: (%s) Starting a PPDDL Knowledge Base", ros::this_node::getName().c_str());
+    else if (extension == ".ppddl") {
+        kb_type = KCL_rosplan::KnowledgeBaseFactory::PPDDL;
+        VAL1_2::parse_category::recoverWriteController(); // This avoids a segfault on finish when PDDL kb is not used
+        ROS_INFO("KCL: (%s) Starting a PPDDL Knowledge Base", ros::this_node::getName().c_str());
         }
 	else if (extension == ".rddl") {
 	    kb_type = KCL_rosplan::KnowledgeBaseFactory::RDDL;
             VAL1_2::parse_category::recoverWriteController(); // This avoids a segfault on finish when PDDL kb is not used
             ROS_INFO("KCL: (%s) Starting a RDDL Knowledge Base", ros::this_node::getName().c_str());
         }
-        else {
+    else if (extension == ".hddl") {
+	    kb_type = KCL_rosplan::KnowledgeBaseFactory::HDDL;
+            ROS_INFO("KCL: (%s) Starting an HDDL Knowledge Base", ros::this_node::getName().c_str());
+        }
+    else {
             ROS_ERROR("KCL: (%s) Unexpected domain file extension %s (expected PDDL/RDDL)", ros::this_node::getName().c_str(), extension.c_str());
             ros::shutdown();
         }
+
 
 	KCL_rosplan::KnowledgeBasePtr kb = KCL_rosplan::KnowledgeBaseFactory::createKB(kb_type, n);
 
@@ -651,4 +713,3 @@ int main(int argc, char **argv) {
 
 	return 0;
 }
-

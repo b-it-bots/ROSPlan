@@ -61,6 +61,7 @@ namespace KCL_rosplan {
 		std::vector<rosplan_knowledge_msgs::KnowledgeItem> facts;
 		std::vector<rosplan_knowledge_msgs::KnowledgeItem> functions;
 		std::vector<rosplan_knowledge_msgs::KnowledgeItem> goals;
+		std::vector<rosplan_knowledge_msgs::KnowledgeItem> tasks;
 		rosplan_knowledge_msgs::KnowledgeItem metric;
 
 		/* timed initial literals */
@@ -71,6 +72,7 @@ namespace KCL_rosplan {
         std::vector<rosplan_knowledge_msgs::KnowledgeItem> returnFacts();
         std::vector<rosplan_knowledge_msgs::KnowledgeItem> returnFunctions();
         std::vector<rosplan_knowledge_msgs::KnowledgeItem> returnGoals();
+        std::vector<rosplan_knowledge_msgs::KnowledgeItem> returnTasks();
 		rosplan_knowledge_msgs::KnowledgeItem returnMetric();
 
 		std::vector<rosplan_knowledge_msgs::KnowledgeItem> returnTimedKnowledge();

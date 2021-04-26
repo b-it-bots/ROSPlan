@@ -66,6 +66,10 @@ namespace KCL_rosplan {
 		state_goal_service = ss.str();
 		ss.str("");
 
+        ss << "/" << knowledge_base << "/state/tasks";
+		task_service = ss.str();
+		ss.str("");
+
 		ss << "/" << knowledge_base << "/state/metric";
 		state_metric_service = ss.str();
 		ss.str("");

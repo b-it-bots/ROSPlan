@@ -16,6 +16,7 @@
 #include "rosplan_knowledge_msgs/GetDomainAttributeService.h"
 #include "rosplan_knowledge_msgs/GetInstanceService.h"
 #include "rosplan_knowledge_msgs/GetAttributeService.h"
+#include "rosplan_knowledge_msgs/GetTaskService.h"
 #include "rosplan_knowledge_msgs/GetMetricService.h"
 
 #ifndef KCL_ProblemGenerator
@@ -39,6 +40,7 @@ namespace KCL_rosplan {
 		std::string state_function_service;
 		std::string state_timed_knowledge_service;
 		std::string state_goal_service;
+		std::string task_service;
 		std::string state_metric_service;
 
 		virtual void makeProblem(std::ofstream &pFile) =0;

@@ -11,14 +11,14 @@
 namespace KCL_rosplan {
 
 	class PDDLProblemGenerator : public ProblemGenerator {
-	private:
-		void makeHeader(std::ofstream &pFile);
-		void makeInitialState(std::ofstream &pFile);
-		void makeGoals(std::ofstream &pFile);
-		void makeMetric(std::ofstream &pFile);
-		void printExpression(std::ofstream &pFile, rosplan_knowledge_msgs::ExprComposite &e);
+	protected:
+		virtual void makeHeader(std::ofstream &pFile);
+		virtual void makeInitialState(std::ofstream &pFile);
+		virtual void makeGoals(std::ofstream &pFile);
+		virtual void makeMetric(std::ofstream &pFile);
+		virtual void printExpression(std::ofstream &pFile, rosplan_knowledge_msgs::ExprComposite &e);
 
-		void makeProblem(std::ofstream &pFile);
+		virtual void makeProblem(std::ofstream &pFile);
 	public:
 	    PDDLProblemGenerator(const std::string& kb): ProblemGenerator(kb) {};
 	};
